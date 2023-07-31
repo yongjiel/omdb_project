@@ -1,26 +1,30 @@
-import React, { useState } from "react";
-import MovieList from "./components/movie_list";
+import React from "react";
+import MovieList from "./components/moveList";
 import { BrowserRouter, HashRouter, Route, Routes } from 'react-router-dom';
-// import Form from "./uncontrolledForm";
 import NoPage from "./components/nopage";
 import reportWebVitals from './reportWebVitals';
-
+import rootReducers from "./rootReducer";
 import { createRoot } from 'react-dom/client';
+import thunk from 'redux-thunk';
+import { createStore, applyMiddleware } from 'redux';
+import { Provider } from 'react-redux';
 
-const initialState = [];
+
+const store = createStore(rootReducers, applyMiddleware(thunk));
 
 const App = () =>{
   return(
-  <BrowserRouter basename='/'>
-   <Routes>
-     <Route index path='/' element={ <MovieList />} />
-     <Route path="/*"  element={ <NoPage url={window.location.href} status={404} />} />
-   </Routes>
-  </BrowserRouter>
-);
+    <Provider store={store}>
+      <BrowserRouter basename='/'>
+      <Routes>
+        <Route index path='/' element={ <MovieList />} />
+        <Route path="/*"  element={ <NoPage url={window.location.href} status={404} />} />
+      </Routes>
+      </BrowserRouter>
+      </Provider>
+    );
 };
 
-export default initialState;
 const container = document.getElementById('root');
 const root = createRoot(container);
 root.render(<App />);
