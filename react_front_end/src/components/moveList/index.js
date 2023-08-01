@@ -1,13 +1,16 @@
 import React from "react";
 import { connect } from "react-redux";
 import SearchBox from "../searchBox";
-import { fetchMovieList } from "./movieListActions";
+import { fetchMovieList, fetchUser, logout} from "./logInmovieListActions";
+import { Formik, Field, Form } from "formik";
 
 
-class MovieList extends React.Component {
+class LogInMovieList extends React.Component {
     constructor(props) {
       super(props);
       this.handleSearchSubmit = this.handleSearchSubmit.bind(this);
+      this.logout = this.logout.bind(this);
+      this.handleLogInSubmit = this.handleLogInSubmit.bind(this);
     }
 
     get_list(text, page){
@@ -25,7 +28,7 @@ class MovieList extends React.Component {
     }
 
     checkUserList(){
-        if (!!this.props.userMovieList && this.props.userMovieList.length === 5){
+        if (!!this.props.user_movies && this.props.user_movies.length === 5){
           const text = (<p style={{backgroundColor: "#F9D1C9"}}> User {this.props.user} has 5 or more records! Please check <a href="">link</a></p>);
 
           return text;
@@ -33,13 +36,26 @@ class MovieList extends React.Component {
         return '';
     }
 
+    logout(){
+      this.props.dispatch(logout());
+      window.location.replace("/");
+    }
+
+    login(){
+      window.location.replace("/");
+    }
+
+    show_logout_button(){
+        return <button onClick={this.logout} style={{border: "0px", backgroundColor: "#DAFCF7"}}>Log Out</button>;            
+    }
+
     get_content(){
       let text = "";
-      if (!this.props.error && this.props.movies.length > 0){
+      if (!this.props.error && this.props.search_movies.length > 0){
         text = (<table key='table'>
                 <tbody key='tbody'>
                 <tr key='head_row'><th style={{textAlign: 'left'}}>Title</th><th style={{textAlign: 'left'}}>Year</th><th>Save?</th></tr>
-                  {this.props.movies.map((post, i) => (
+                  {this.props.search_movies.map((post, i) => (
                     <tr key={'row'+i}>
                     <td key={post.imdbID} style={{width: '600px'}}>
                       {post.Title}
@@ -47,7 +63,7 @@ class MovieList extends React.Component {
                     <td style={{width: '150px'}}>{post.Year}</td>
                     <td><button onClick={()=>this.save(post.imdbID)}
                               disabled={ 
-                                (this.props.userMovieList.includes(post.imdbID) || this.props.userMovieList.length >=5)? true: false}>
+                                (this.props.user_movies.includes(post.imdbID) || this.props.user_movies.length >=5)? true: false}>
                         Save</button></td>
                     </tr>
                   ))}
@@ -59,12 +75,66 @@ class MovieList extends React.Component {
 
       return text;
     }
+
+    checkError(){
+      if (!!this.props.error){
+          const text = (<p style={{backgroundColor: "#F9D1C9"}}>{this.props.error}</p>);
+          return text;
+      }
+      return '';
+    }
   
-    render() {
+    get_user(values){
+      this.props.dispatch(fetchUser(values));
+    }
+
+    handleLogInSubmit(values){
+    //alert(JSON.stringify(values, null, 2))
+      this.get_user(values);
+    }
+  
+    get_login_content(){
+        let text = "";
+          text = (<Formik
+                      initialValues={{ username: "example", password: "sample_12" }}
+                      onSubmit={async (values) => {
+                      await new Promise((resolve) => setTimeout(resolve, 500));
+                      this.handleLogInSubmit(values);
+                      }}
+                  >
+                      <Form>
+                          <table key="login_table">
+                              <tbody key="login_tbody">
+                          <tr key="user_row"><td><label htmlFor="username">Username:</label></td>
+                              <td><Field name="username" label='Userame' type="text" /></td></tr>
+                          <tr key='password_row'><td><label htmlFor="password">Password:</label></td>
+                              <td><Field name="password" label='password' type="password" /></td></tr>
+                              </tbody>
+                          </table>
+                      <button type="submit">Submit</button>
+                      </Form>
+                  </Formik>
+                  );
+  
+        return text;
+    }
+
+    get_login_part(){
       return (
         <div>
+          <h1>Log in</h1>
+          { this.checkError() }
+          { this.get_login_content() }
+        </div>
+      );
+    }
+
+    get_search_part(){
+      return (
+        <div>
+          {this.show_logout_button()}
           {this.checkUserList()}
-          <h1>Search Movie List</h1>
+          <h1>Search Movie List. </h1>
           <SearchBox handleSearchSubmit={this.handleSearchSubmit}/>
           {!!this.props.page && !!this.props.totalPages &&
             (<div>Totally {this.props.totalResults} records. Show from {this.props.page * 10 - 9} - 
@@ -83,23 +153,33 @@ class MovieList extends React.Component {
         </div>
       );
     }
+    
+    render() {
+      if (!!this.props.user){
+          return this.get_search_part();
+      }else{
+          return this.get_login_part();
+      }
+
+    }
 
 }
 
 
 const mapStateToProps = state => {
   return {
-    search_text: state.movieListReducer.search_text,
-    movies: state.movieListReducer.movies,
-    page: state.movieListReducer.page,
-    totalPages: state.movieListReducer.totalPages,
-    totalResults: state.movieListReducer.totalResults,
-    error: state.movieListReducer.error,
-    userMovieList: state.movieListReducer.userMovieList,
-    user: state.movieListReducer.user,
+    search_text: state.logInmovieListReducer.search_text,
+    search_movies: state.logInmovieListReducer.search_movies,
+    page: state.logInmovieListReducer.page,
+    totalPages: state.logInmovieListReducer.totalPages,
+    totalResults: state.logInmovieListReducer.totalResults,
+    error: state.logInmovieListReducer.error,
+    user: state.logInmovieListReducer.username,
+    loggedIn: state.logInmovieListReducer.loggedIn,
+    user_movies: state.logInmovieListReducer.user_movies
   };
 };
 
-export default connect(mapStateToProps)(MovieList);
+export default connect(mapStateToProps)(LogInMovieList);
 
 

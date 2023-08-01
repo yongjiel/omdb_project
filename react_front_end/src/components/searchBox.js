@@ -11,7 +11,7 @@ class SearchBox extends React.Component {
             <>
             <div key={"search_box"}>
             <form onSubmit={this.handleSubmit}>
-            <input  placeholder={"Movie Title"} name="search">
+            <input name="search" defaultValue={"social"}>
             </input> 
             <button type="submit">Search</button>
             </form>

@@ -1,6 +1,6 @@
 import React from "react";
-import MovieList from "./components/moveList";
-import { BrowserRouter, HashRouter, Route, Routes } from 'react-router-dom';
+import LogInMovieList from "./components/moveList";
+import { BrowserRouter, HashRouter, Route, Routes, Navigate} from 'react-router-dom';
 import NoPage from "./components/nopage";
 import reportWebVitals from './reportWebVitals';
 import rootReducers from "./rootReducer";
@@ -17,7 +17,7 @@ const App = () =>{
     <Provider store={store}>
       <BrowserRouter basename='/'>
       <Routes>
-        <Route index path='/' element={ <MovieList />} />
+        <Route index path='/' element={ <LogInMovieList />} />
         <Route path="/*"  element={ <NoPage url={window.location.href} status={404} />} />
       </Routes>
       </BrowserRouter>
