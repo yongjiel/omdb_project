@@ -8,7 +8,11 @@ import {
     FETCH_USER_SUCCESS,
     FETCH_USER_FAILURE,
     FETCH_USER_MOVIE_SUCCESS,
-    LOG_OUT
+    LOG_OUT,
+    ADD_MOVIE,
+    SHOW_USER_MOVIES,
+    BACK_TO_SEARCH_PART,
+    DELETE_MOVIE
   } from './logInmovieListActions';
   
   const initialState = {
@@ -19,8 +23,9 @@ import {
         totalResults: 0,
         username: null,
         loggedIn: false,
-        user_movies: ["tt1285016", "tt1285016","tt0186508", "tt0186508"],
+        user_movies: [],
         error: null,
+        show_user_movies_flag: false,
   };
   
   export default function logInmovieListReducer(state = initialState, action) {
@@ -33,6 +38,8 @@ import {
         return {
           ...state,
           ...action.payload,
+          username: state.username,
+          show_user_movies_flag: false
         };
       
       case FETCH_MOVIE_LIST_SUCCESS_EMPTY_RESULT:
@@ -42,19 +49,22 @@ import {
           page: 0,
           totalPages: 0,
           totalResults: 0,
-          error: "No movie found."
+          error: "No movie found.",
+          show_user_movies_flag: false
         };
 
       case FETCH_MOVIE_LIST_FAILURE:
         return {
           ...initialState,
           error: "Could not fetch movie list ",
+          show_user_movies_flag: false
         };
 
         case FETCH_USER_BEGIN:
           return {
             ...state,
-            error: null
+            error: null,
+            show_user_movies_flag: false
           };
     
         case FETCH_USER_SUCCESS:
@@ -62,13 +72,15 @@ import {
             ...state,
             username: action.payload.username,
             loggedIn: true,
-            error: null
+            error: null,
+            show_user_movies_flag: false
           };
     
       case FETCH_USER_MOVIE_SUCCESS:
         return {
           ...state,
-          user_movies: action.payload.movies
+          user_movies: action.payload.movies,
+          show_user_movies_flag: false
         };
   
       case FETCH_USER_FAILURE:
@@ -76,12 +88,47 @@ import {
           ...state,
           loggedIn: false,
           error: action.payload.error,
+          show_user_movies_flag: false
         };
 
-        case LOG_OUT:
+      case LOG_OUT:
           return {
             ...initialState
           };
+      
+      case ADD_MOVIE:
+        return {
+          ...state,
+          user_movies: [...state.user_movies, action.payload.post],
+          show_user_movies_flag: false
+        }
+      
+      case SHOW_USER_MOVIES:
+        return {
+          ...state,
+          show_user_movies_flag: true
+        }
+      
+      case BACK_TO_SEARCH_PART:
+        return {
+          ...state,
+          show_user_movies_flag: false
+        }
+      
+      case DELETE_MOVIE:
+        return {
+          ...state,
+          user_movies: state.user_movies.filter( (each) => {
+            console.log("111111")
+            console.log(each)
+            console.log(action.payload.movie)
+            console.log(each.imdbID !== action.payload.movie.imdbID)
+            if (each != action.payload.movie) {
+              return true;
+            }
+            return false;
+          } )
+        }
       default:
         return state;
     }

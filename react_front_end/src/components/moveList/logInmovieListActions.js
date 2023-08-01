@@ -4,6 +4,7 @@ export const FETCH_MOVIE_LIST_BEGIN   = 'FETCH_MOVIE_LIST_BEGIN';
 export const FETCH_MOVIE_LIST_SUCCESS = 'FETCH_MOVIE_LIST_SUCCESS';
 export const FETCH_MOVIE_LIST_FAILURE = 'FETCH_MOVIE_LIST_FAILURE';
 export const FETCH_MOVIE_LIST_SUCCESS_EMPTY_RESULT = 'FETCH_MOVIE_LIST_SUCCESS_EMPTY_RESULT';
+export const BACK_TO_SEARCH_PART = "BACK_TO_SEARCH_PART";
 
 export const fetchMovieListBegin = (text, page) => ({
   type: FETCH_MOVIE_LIST_BEGIN,
@@ -25,6 +26,16 @@ export const fetchMovieListFailure = error => ({
   type: FETCH_MOVIE_LIST_FAILURE,
   payload: { error }
 });
+
+export const backToSearchPart  = () => ({
+  type: BACK_TO_SEARCH_PART
+});
+
+export function backtoSearchPart() {
+  return dispatch => {
+    dispatch(backToSearchPart());
+  }
+}
 
 export function fetchMovieList(text, page) {
   return dispatch => {
@@ -64,6 +75,10 @@ export const FETCH_USER_FAILURE = 'FETCH_USER_FAILURE';
 export const FETCH_USER_SUCCESS_EMPTY_RESULT = 'FETCH_USER_SUCCESS_EMPTY_RESULT';
 export const FETCH_USER_MOVIE_SUCCESS = 'FETCH_USER_MOVIE_SUCCESS';
 export const LOG_OUT = 'LOG_OUT';
+export const ADD_MOVIE = 'ADD_MOVIE';
+export const SHOW_USER_MOVIES = "SHOW_USER_MOVIES";
+export const DELETE_MOVIE = "DELETE_MOVIE";
+
 
 export const fetccUserBegin = () => ({
   type: FETCH_USER_BEGIN
@@ -79,6 +94,15 @@ export const fetccUserMovieSuccess = (movies) =>({
   payload: {movies}
 });
 
+export const addMovie = (post) =>({
+  type: ADD_MOVIE,
+  payload: {post}
+});
+
+export const showUserMovies = ()=> ({
+  type: SHOW_USER_MOVIES
+});
+
 
 export const fetccUserFailure = error => ({
   type: FETCH_USER_FAILURE,
@@ -89,9 +113,32 @@ export const logOut = () => ({
   type: LOG_OUT
 });
 
+export const deleteMovie = (movie) => ({
+  type: DELETE_MOVIE,
+  payload: {movie}
+});
+
 export function logout(){
   return dispatch => {
     dispatch(logOut())};
+}
+
+export function addmovie(post){
+  return dispatch => {
+    dispatch(addMovie(post));
+  }
+}
+
+export function showUsermovies(){
+  return dispatch => {
+    dispatch(showUserMovies());
+  }
+}
+
+export function deletmovie(post){
+  return dispatch => {
+    dispatch(deleteMovie(post));
+  }
 }
 
 export function fetchUser(value) {

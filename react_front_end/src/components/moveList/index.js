@@ -1,7 +1,10 @@
 import React from "react";
 import { connect } from "react-redux";
 import SearchBox from "../searchBox";
-import { fetchMovieList, fetchUser, logout} from "./logInmovieListActions";
+import { 
+    fetchMovieList, fetchUser, logout,
+    addmovie, showUsermovies, backtoSearchPart,
+    deletmovie} from "./logInmovieListActions";
 import { Formik, Field, Form } from "formik";
 
 
@@ -11,6 +14,10 @@ class LogInMovieList extends React.Component {
       this.handleSearchSubmit = this.handleSearchSubmit.bind(this);
       this.logout = this.logout.bind(this);
       this.handleLogInSubmit = this.handleLogInSubmit.bind(this);
+      this.checkUserList = this.checkUserList.bind(this);
+      this.show_user_movies = this.show_user_movies.bind(this);
+      this.show_search_part = this.show_search_part.bind(this);
+      this.delete = this.delete.bind(this);
     }
 
     get_list(text, page){
@@ -23,17 +30,35 @@ class LogInMovieList extends React.Component {
       this.get_list(form.search.value, 1);
     }
 
-    save(imdbID){
-      alert(imdbID);
+    save(post){
+      //alert(JSON.stringify(post, null, 2));
+      console.log(JSON.stringify(post, null, 2))
+      this.props.dispatch(addmovie(post));
+    }
+
+    show_user_movies(){
+      this.props.dispatch(showUsermovies());
     }
 
     checkUserList(){
-        if (!!this.props.user_movies && this.props.user_movies.length === 5){
-          const text = (<p style={{backgroundColor: "#F9D1C9"}}> User {this.props.user} has 5 or more records! Please check <a href="">link</a></p>);
+        if (!!this.props.user_movies && this.props.user_movies.length >= 5){
+          const text = (<p style={{backgroundColor: "#F9D1C9"}}> User {this.props.user} has 5 or more records! Please check <button
+            onClick={this.show_user_movies} style={{border: "0px", backgroundColor: "#DAFCF7"}}>{this.props.user}&lsquo;s movies</button></p>);
 
           return text;
         }
         return '';
+    }
+
+    check_in_user_movies(imdbID){
+      if (this.props.user_movies.length === 0){
+        return false;
+      }
+      let tmp = this.props.user_movies.map((each)=> each.imdbID);
+      if (tmp.includes(imdbID)){
+        return true;
+      }
+      return false;
     }
 
     logout(){
@@ -49,6 +74,10 @@ class LogInMovieList extends React.Component {
         return <button onClick={this.logout} style={{border: "0px", backgroundColor: "#DAFCF7"}}>Log Out</button>;            
     }
 
+    show_search_part(){
+        this.props.dispatch(backtoSearchPart());
+    }
+
     get_content(){
       let text = "";
       if (!this.props.error && this.props.search_movies.length > 0){
@@ -61,9 +90,9 @@ class LogInMovieList extends React.Component {
                       {post.Title}
                     </td>
                     <td style={{width: '150px'}}>{post.Year}</td>
-                    <td><button onClick={()=>this.save(post.imdbID)}
+                    <td><button onClick={()=>this.save(post)}
                               disabled={ 
-                                (this.props.user_movies.includes(post.imdbID) || this.props.user_movies.length >=5)? true: false}>
+                                (this.check_in_user_movies(post.imdbID) || this.props.user_movies.length >=5)? true: false}>
                         Save</button></td>
                     </tr>
                   ))}
@@ -132,7 +161,9 @@ class LogInMovieList extends React.Component {
     get_search_part(){
       return (
         <div>
-          {this.show_logout_button()}
+          {this.show_logout_button()}&nbsp;
+          <button
+            onClick={this.show_user_movies} style={{border: "0px", backgroundColor: "#DAFCF7"}}>{this.props.user}&lsquo;s movies</button>
           {this.checkUserList()}
           <h1>Search Movie List. </h1>
           <SearchBox handleSearchSubmit={this.handleSearchSubmit}/>
@@ -153,9 +184,40 @@ class LogInMovieList extends React.Component {
         </div>
       );
     }
+
+    delete(post){
+      this.props.dispatch(deletmovie(post));
+    }
+
+    get_user_movies_part(){
+      let text = "";
+        text = (<div>
+                {this.show_logout_button()}&nbsp;
+                <button onClick={this.show_search_part}  style={{border: "0px", backgroundColor: "#DAFCF7"}}> Back to search </button>
+                <h1>Hi,{this.props.user}, your Movie List. </h1>
+                <table key='table'>
+                <tbody key='tbody'>
+                <tr key='head_row'><th style={{textAlign: 'left'}}>Title</th><th style={{textAlign: 'left'}}>Year</th><th>Delete?</th></tr>
+                  {this.props.user_movies.map((post, i) => (
+                    <tr key={'row'+i}>
+                    <td key={post.imdbID} style={{width: '600px'}}>
+                      {post.Title}
+                    </td>
+                    <td style={{width: '150px'}}>{post.Year}</td>
+                    <td><button onClick={()=>this.delete(post)}>
+                        Delete</button></td>
+                    </tr>
+                  ))}
+                </tbody>
+                </table></div>);
+
+      return text;
+    }
     
     render() {
-      if (!!this.props.user){
+      if (this.props.show_user_movies_flag){
+        return this.get_user_movies_part();
+      }else if (!!this.props.user ){
           return this.get_search_part();
       }else{
           return this.get_login_part();
@@ -176,7 +238,8 @@ const mapStateToProps = state => {
     error: state.logInmovieListReducer.error,
     user: state.logInmovieListReducer.username,
     loggedIn: state.logInmovieListReducer.loggedIn,
-    user_movies: state.logInmovieListReducer.user_movies
+    user_movies: state.logInmovieListReducer.user_movies,
+    show_user_movies_flag: state.logInmovieListReducer.show_user_movies_flag
   };
 };
 
