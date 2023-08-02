@@ -22,3 +22,8 @@
 9. Do the above and delete some user's records, and back to the search.
 10. In search box, input anything you like to do the test.
 
+
+
+=== Test Result ===
+1. Tested Mac OS 13.4.1 successfully
+

@@ -4,8 +4,9 @@ import SearchBox from "../searchBox";
 import { 
     fetchMovieList, fetchUser, logout,
     addmovie, showUsermovies, backtoSearchPart,
-    deletmovie} from "./logInmovieListActions";
+    deletmovie, closemodal, openmodal} from "./logInmovieListActions";
 import { Formik, Field, Form } from "formik";
+import Modal from "react-modal";
 
 
 class LogInMovieList extends React.Component {
@@ -18,6 +19,12 @@ class LogInMovieList extends React.Component {
       this.show_user_movies = this.show_user_movies.bind(this);
       this.show_search_part = this.show_search_part.bind(this);
       this.delete = this.delete.bind(this);
+      this.save = this.save.bind(this);
+      this.close_modal = this.close_modal.bind(this);
+      this.open_modal = this.open_modal.bind(this);
+      this.show_modal = this.show_modal.bind(this);
+      this.get_search_part = this.get_search_part.bind(this);
+      this.get_login_part = this.get_login_part.bind(this);
     }
 
     get_list(text, page){
@@ -31,14 +38,14 @@ class LogInMovieList extends React.Component {
     }
 
     save(post){
-      //alert(JSON.stringify(post, null, 2));
-      //console.log(JSON.stringify(post, null, 2))
       this.props.dispatch(addmovie(post, this.props.user, this.props.password));
     }
 
     delete(post){
-      let index = this.props.user_movies.indexOf(post);
-      this.props.dispatch(deletmovie(index, post.imdbID, this.props.user, this.props.password));
+      if(window.confirm('Are you sure to delete this record?')){ 
+        let index = this.props.user_movies.indexOf(post);
+        this.props.dispatch(deletmovie(index, post.imdbID, this.props.user, this.props.password));
+      }
     }
 
     show_user_movies(){
@@ -123,7 +130,6 @@ class LogInMovieList extends React.Component {
     }
 
     handleLogInSubmit(values){
-    //alert(JSON.stringify(values, null, 2))
       this.get_user(values);
     }
   
@@ -182,12 +188,16 @@ class LogInMovieList extends React.Component {
                   <span><button onClick={()=>this.get_list(this.props.search_text, this.props.page-1)}
                           disabled={(this.props.page === 1)? true: false}> &lt; </button></span>
                   <span><button onClick={()=>this.get_list(this.props.search_text, this.props.page+1)}
-                          disabled={(this.props.page == this.props.totalPages)? true: false}> &gt; </button></span>
+                          disabled={(this.props.page === this.props.totalPages)? true: false}> &gt; </button></span>
                   <span><button onClick={()=>this.get_list(this.props.search_text, this.props.totalPages)}> {this.props.totalPages} </button></span>
                   </div>)}
 
         </div>
       );
+    }
+
+    open_modal(imdbID){
+      this.props.dispatch(openmodal(imdbID));
     }
 
     get_user_movies_part(){
@@ -202,17 +212,91 @@ class LogInMovieList extends React.Component {
                   {this.props.user_movies.map((post, i) => (
                     <tr key={'row'+i}>
                     <td key={post.imdbID} style={{width: '600px'}}>
-                      {post.Title}
+                      <a onClick={()=>{this.open_modal(post.imdbID)}} style={{color: "#2F020C"}}>
+                        <u>{post.Title}</u></a>
                     </td>
                     <td style={{width: '150px'}}>{post.Year}</td>
-                    <td><button onClick={()=>this.delete(post)}>
+                    <td><button onClick={ () => {this.delete(post)} } >
                         Delete</button></td>
                     </tr>
                   ))}
                 </tbody>
-                </table></div>);
+                </table>
+                {this.props.isOpenModal && this.show_modal()}
+                </div>);
 
       return text;
+    }
+
+    close_modal(){
+      this.props.dispatch(closemodal());
+    }
+
+    show_modal(){
+      let movies = [];
+      let imdbID = this.props.modalImdbID;
+      if (!!this.props.user_movies_entire_records){
+        movies = this.props.user_movies_entire_records.filter( movie =>{
+                    if (movie.imdbID === imdbID){
+                      return true;
+                    }
+                });
+      }
+      let movie = movies[0];
+      let keys = Object.keys(movie);
+      let table_content = keys.map((k, i) => (
+          <tr key={'modal_row' + i}><td>{k}</td><td>{JSON.stringify(movie[k], null, 2)}</td></tr>
+      ))
+      const modalStyle = {
+        overlay: {
+            position: 'absolute',
+            top: '95px',
+            bottom: '70px',
+            left: '50%',
+            width: '650px',
+            marginLeft: '35px',
+            marginRight: 'auto',
+            transform: 'translate(-50%, -0%)',
+            backgroundColor: 'white',
+            border: '1px',
+            borderStyle: 'solid',
+            borderColor: 'blue',
+            borderRadius: '3px'
+        },
+        content: {
+            position: 'absolute',
+            top: '0px',
+            left: '0px',
+            right: '0px',
+            bottom: '0px',
+            background: '#dddddd',
+            overflow: 'auto',
+            WebkitOverflowScrolling: 'touch',
+            padding: '10px',
+            border: '5px',
+            borderStyle: 'solid',
+            borderColor: 'white'
+        }
+    };
+      return (
+        <div>
+          <Modal
+          isOpen={this.props.isOpenModal}
+          onRequestClose={this.close_modal}
+          style={modalStyle}
+        >
+         <button type="button" className="close"
+                 onClick={()=>this.close_modal()}>&times;</button>
+          <table  key={'modal_table'}>
+            <tbody key={'modal_tbody'}>
+          {table_content}
+          </tbody>
+          </table>
+        </Modal> 
+          
+        </div>
+       
+      );
     }
     
     render() {
@@ -241,7 +325,10 @@ const mapStateToProps = state => {
     password: state.logInmovieListReducer.password,
     loggedIn: state.logInmovieListReducer.loggedIn,
     user_movies: state.logInmovieListReducer.user_movies,
-    show_user_movies_flag: state.logInmovieListReducer.show_user_movies_flag
+    show_user_movies_flag: state.logInmovieListReducer.show_user_movies_flag,
+    isOpenModal: state.logInmovieListReducer.isOpenModal,
+    user_movies_entire_records: state.logInmovieListReducer.user_movies_entire_records,
+    modalImdbID: state.logInmovieListReducer.modalImdbID
   };
 };
 

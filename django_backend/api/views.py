@@ -1,7 +1,6 @@
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.decorators import api_view
 from rest_framework import status
 from rest_framework import permissions
 from django.contrib.auth.models import User, Group
@@ -10,12 +9,6 @@ from .serializers import (MovieSerializer, MovieRatingSerializer,
                          UserSerializer, GroupSerializer)
 import copy
 from rest_framework import viewsets
-
-
-@api_view(['GET'])
-def getData(request):
-    person = {"user": "DOW", "age": 21}
-    return Response(person)
 
 
 class MovieRatingsApiView(APIView):
@@ -59,6 +52,7 @@ class MoviesApiView(APIView):
     def post(self, request, *args, **kwargs):
         data = request.data
         try:
+            # created, if not created, will throw exception
             movie = Movie.objects.filter(imdbID=data['imdbID']).first()
             movie_cp = copy.deepcopy(movie.__dict__)
             if '_state' in movie_cp:

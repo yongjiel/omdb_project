@@ -16,7 +16,10 @@ import {
     ADD_MOVIE_FAILURE,
     ADD_MOVIE_SUCCESS,
     DELETE_MOIVIE_FAILURE,
-    DELETE_MOIVIE_SUCCESS
+    DELETE_MOIVIE_SUCCESS,
+    ADD_MOVIE_ENTIRE_RECORD,
+    CLOSE_MODAL,
+    OPEN_MODAL
   } from './logInmovieListActions';
   
   const initialState = {
@@ -30,8 +33,11 @@ import {
         loggedIn: false,
         user_movies: [],
         user_mvoives_save: [],
+        user_movies_entire_records: [],
         error: null,
         show_user_movies_flag: false,
+        isOpenModal: false,
+        modalImdbID: null
   };
   
   export default function logInmovieListReducer(state = initialState, action) {
@@ -156,6 +162,31 @@ import {
             ...state,
             show_user_movies_flag: true
           }
+
+      case ADD_MOVIE_ENTIRE_RECORD:
+          return {
+            ...state,
+            user_movies_entire_records: [...state.user_movies_entire_records,
+                                        action.payload.data],
+            show_user_movies_flag: false
+          }
+      
+      case CLOSE_MODAL:
+        return {
+          ...state,
+          isOpenModal: false,
+          modalImdbID: null,
+          show_user_movies_flag: true
+        }
+
+      case OPEN_MODAL:
+        return {
+          ...state,
+          isOpenModal: true,
+          modalImdbID: action.payload.imdbID,
+          show_user_movies_flag: true
+        }
+
       default:
         return state;
     }

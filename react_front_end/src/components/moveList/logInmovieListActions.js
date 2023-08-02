@@ -82,6 +82,18 @@ export const ADD_MOVIE_SUCCESS = 'ADD_MOVIE_SUCCESS';
 export const ADD_MOVIE_FAILURE = 'ADD_MOVIE_FAILURE';
 export const DELETE_MOIVIE_FAILURE = 'DELETE_MOIVIE_FAILURE';
 export const DELETE_MOIVIE_SUCCESS = 'DELETE_MOIVIE_SUCCESS';
+export const ADD_MOVIE_ENTIRE_RECORD = 'ADD_MOVIE_ENTIRE_RECORD';
+export const CLOSE_MODAL = "CLOSE_MODAL";
+export const OPEN_MODAL = "OPEN_MODAL";
+
+export const closeModal = () => ({
+  type: CLOSE_MODAL
+});
+
+export const openModal = (imdbID)  => ({
+  type: OPEN_MODAL,
+  payload: {imdbID}
+});
 
 export const fetccUserBegin = () => ({
   type: FETCH_USER_BEGIN
@@ -137,9 +149,30 @@ export const deleteMovieFailure =()=>({
   type: DELETE_MOIVIE_FAILURE
 });
 
+export const addMovieEntireRecord =(data)=>({
+  type: ADD_MOVIE_ENTIRE_RECORD,
+  payload:  {data}
+});
+
+export function closemodal(){
+  return dispatch => {
+    dispatch(closeModal())};
+}
+
+export function openmodal(imdbID){
+  return dispatch => {
+    dispatch(openModal(imdbID))};
+}
+
 export function logout(){
   return dispatch => {
     dispatch(logOut())};
+}
+
+export function add_movie_entire_record(data){
+  return dispatch => {
+    dispatch(addMovieEntireRecord(data));
+  }
 }
 
 export function addmovie(post, username, password){
@@ -148,17 +181,18 @@ export function addmovie(post, username, password){
     const url = `https://www.omdbapi.com/?apikey=6ca48b3b&i=` + post.imdbID;
     axios.get(url)
           .then(res => {
+              dispatch(add_movie_entire_record(res.data));
               const url = `http://127.0.0.1:8000/api/movies`;
               fetch(url
-                ,{
-                  headers: {
-                    'Content-type': 'application/json',
-                    'Accept': 'application/json',
-                    'Authorization': 'Basic ' + btoa(username+":"+password),
-                  },
-                  method: "POST",
-                  body: JSON.stringify(res.data)
-                })
+                      ,{
+                        headers: {
+                          'Content-type': 'application/json',
+                          'Accept': 'application/json',
+                          'Authorization': 'Basic ' + btoa(username+":"+password),
+                        },
+                        method: "POST",
+                        body: JSON.stringify(res.data)
+                      })
               .then(res => {
                 if ( [200, 201].includes(res.status) ) {
                     dispatch(addMovieSuccess());

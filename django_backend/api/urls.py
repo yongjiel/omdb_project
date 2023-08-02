@@ -4,8 +4,7 @@ from django.urls import path, include
 from .views import (
     MovieApiView,
     MoviesApiView,
-    MovieRatingsApiView,
-    getData
+    MovieRatingsApiView
 )
 from rest_framework import routers
 from .views import UserViewSet, GroupViewSet
@@ -19,6 +18,5 @@ urlpatterns = [
     path('movies', MoviesApiView.as_view()),
     path('movies/<str:id>', MovieApiView.as_view()),
     path('ratings', MovieRatingsApiView.as_view()),
-    path('', include(router.urls)),
-    path('try', getData)
+    path('', include(router.urls))
 ]
