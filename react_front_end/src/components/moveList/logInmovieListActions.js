@@ -78,15 +78,18 @@ export const LOG_OUT = 'LOG_OUT';
 export const ADD_MOVIE = 'ADD_MOVIE';
 export const SHOW_USER_MOVIES = "SHOW_USER_MOVIES";
 export const DELETE_MOVIE = "DELETE_MOVIE";
-
+export const ADD_MOVIE_SUCCESS = 'ADD_MOVIE_SUCCESS';
+export const ADD_MOVIE_FAILURE = 'ADD_MOVIE_FAILURE';
+export const DELETE_MOIVIE_FAILURE = 'DELETE_MOIVIE_FAILURE';
+export const DELETE_MOIVIE_SUCCESS = 'DELETE_MOIVIE_SUCCESS';
 
 export const fetccUserBegin = () => ({
   type: FETCH_USER_BEGIN
 });
 
-export const fetccUserSuccess = (username) => ({
+export const fetccUserSuccess = (username, password) => ({
   type: FETCH_USER_SUCCESS,
-  payload: {username}
+  payload: {username: username, password: password}
 });
 
 export const fetccUserMovieSuccess = (movies) =>({
@@ -97,6 +100,14 @@ export const fetccUserMovieSuccess = (movies) =>({
 export const addMovie = (post) =>({
   type: ADD_MOVIE,
   payload: {post}
+});
+
+export const addMovieSuccess = () =>({
+  type: ADD_MOVIE_SUCCESS
+});
+
+export const addMovieFailure = () => ({
+  type: ADD_MOVIE_FAILURE
 });
 
 export const showUserMovies = ()=> ({
@@ -113,9 +124,17 @@ export const logOut = () => ({
   type: LOG_OUT
 });
 
-export const deleteMovie = (movie) => ({
+export const deleteMovie = (i) => ({
   type: DELETE_MOVIE,
-  payload: {movie}
+  payload: {i}
+});
+
+export const deleteMovieSuccess =()=>({
+  type: DELETE_MOIVIE_SUCCESS
+});
+
+export const deleteMovieFailure =()=>({
+  type: DELETE_MOIVIE_FAILURE
 });
 
 export function logout(){
@@ -123,21 +142,70 @@ export function logout(){
     dispatch(logOut())};
 }
 
-export function addmovie(post){
+export function addmovie(post, username, password){
   return dispatch => {
     dispatch(addMovie(post));
+    const url = `https://www.omdbapi.com/?apikey=6ca48b3b&i=` + post.imdbID;
+    axios.get(url)
+          .then(res => {
+              const url = `http://127.0.0.1:8000/api/movies`;
+              fetch(url
+                ,{
+                  headers: {
+                    'Content-type': 'application/json',
+                    'Accept': 'application/json',
+                    'Authorization': 'Basic ' + btoa(username+":"+password),
+                  },
+                  method: "POST",
+                  body: JSON.stringify(res.data)
+                })
+              .then(res => {
+                if ( [200, 201].includes(res.status) ) {
+                    dispatch(addMovieSuccess());
+                } else {
+                    dispatch(addMovieFailure())
+                }
+              })
+              .catch(
+                error => {
+                  console.log(error);
+                }
+              );
+    });
+  }
+}
+
+export function deletmovie(i, imdbID, username, password){
+  return dispatch => {
+    dispatch(deleteMovie(i));
+    const url = `http://127.0.0.1:8000/api/movies/`+imdbID;
+              fetch(url
+                ,{
+                  headers: {
+                    'Content-type': 'application/json',
+                    'Accept': 'application/json',
+                    'Authorization': 'Basic ' + btoa(username+":"+password),
+                  },
+                  method: "DELETE"
+                })
+              .then(res => {
+                if ( [204].includes(res.status) ) {
+                    dispatch(deleteMovieSuccess());
+                } else {
+                    dispatch(deleteMovieFailure())
+                }
+              })
+              .catch(
+                error => {
+                  console.log(error);
+                }
+              );
   }
 }
 
 export function showUsermovies(){
   return dispatch => {
     dispatch(showUserMovies());
-  }
-}
-
-export function deletmovie(post){
-  return dispatch => {
-    dispatch(deleteMovie(post));
   }
 }
 
@@ -156,41 +224,12 @@ export function fetchUser(value) {
             })
       .then(res => {
         if (res.status === 200) {
-            dispatch(fetccUserSuccess(value.username));
-            //dispatch(fetccUserMovieCount(value.username, value.password));
-            return {username: value.username};
+            dispatch(fetccUserSuccess(value.username, value.password));
+            return {username: value.username, password: value.password};
         } else {
           dispatch(fetccUserFailure("User credential not correct!"))
         }
         
-      })
-      .catch(
-        error => {
-          console.log(error);
-          dispatch(fetccUserFailure(error))
-        }
-      );
-  };
-}
-
-export function fetccUserMovieCount(username, password) {
-  return dispatch => {
-    const url = `http://127.0.0.1:8000/usermovie/`;
-    return fetch(url
-            ,{
-              headers: {
-                'Content-type': 'application/json',
-                'Accept': 'application/json',
-                'Authorization': 'Basic ' + btoa(username + ":" + password),
-              },
-              credentials: 'same-origin'
-            })
-      .then(res => {
-        return res.json()
-      })
-      .then(json => {
-        dispatch(fetccUserMovieSuccess(json));
-        return json.data;
       })
       .catch(
         error => {

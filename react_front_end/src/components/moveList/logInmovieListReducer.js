@@ -12,7 +12,11 @@ import {
     ADD_MOVIE,
     SHOW_USER_MOVIES,
     BACK_TO_SEARCH_PART,
-    DELETE_MOVIE
+    DELETE_MOVIE,
+    ADD_MOVIE_FAILURE,
+    ADD_MOVIE_SUCCESS,
+    DELETE_MOIVIE_FAILURE,
+    DELETE_MOIVIE_SUCCESS
   } from './logInmovieListActions';
   
   const initialState = {
@@ -22,8 +26,10 @@ import {
         totalPages: 0,
         totalResults: 0,
         username: null,
+        password: null,
         loggedIn: false,
         user_movies: [],
+        user_mvoives_save: [],
         error: null,
         show_user_movies_flag: false,
   };
@@ -71,6 +77,7 @@ import {
           return {
             ...state,
             username: action.payload.username,
+            password: action.payload.password,
             loggedIn: true,
             error: null,
             show_user_movies_flag: false
@@ -103,6 +110,20 @@ import {
           show_user_movies_flag: false
         }
       
+      case ADD_MOVIE_SUCCESS:
+        return {
+          ...state,
+          user_mvoives_save: [...state.user_mvoives_save, true],
+          show_user_movies_flag: false
+        }
+      
+      case ADD_MOVIE_FAILURE:
+        return {
+          ...state,
+          user_mvoives_save: [...state.user_mvoives_save, false],
+          show_user_movies_flag: false
+        }
+
       case SHOW_USER_MOVIES:
         return {
           ...state,
@@ -118,17 +139,23 @@ import {
       case DELETE_MOVIE:
         return {
           ...state,
-          user_movies: state.user_movies.filter( (each) => {
-            console.log("111111")
-            console.log(each)
-            console.log(action.payload.movie)
-            console.log(each.imdbID !== action.payload.movie.imdbID)
-            if (each != action.payload.movie) {
-              return true;
-            }
-            return false;
-          } )
+          user_movies: [...state.user_movies.slice(0, action.payload.i),
+                        ...state.user_movies.slice(action.payload.i+1)],
+          user_mvoives_save: [...state.user_mvoives_save.slice(0, action.payload.i),
+                              ...state.user_mvoives_save.slice(action.payload.i+1)],
+          show_user_movies_flag: true
         }
+      case DELETE_MOIVIE_FAILURE:
+        return {
+          ...state,
+          show_user_movies_flag: true
+        }
+
+      case DELETE_MOIVIE_SUCCESS:
+          return {
+            ...state,
+            show_user_movies_flag: true
+          }
       default:
         return state;
     }

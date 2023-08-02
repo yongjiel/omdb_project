@@ -32,8 +32,13 @@ class LogInMovieList extends React.Component {
 
     save(post){
       //alert(JSON.stringify(post, null, 2));
-      console.log(JSON.stringify(post, null, 2))
-      this.props.dispatch(addmovie(post));
+      //console.log(JSON.stringify(post, null, 2))
+      this.props.dispatch(addmovie(post, this.props.user, this.props.password));
+    }
+
+    delete(post){
+      let index = this.props.user_movies.indexOf(post);
+      this.props.dispatch(deletmovie(index, post.imdbID, this.props.user, this.props.password));
     }
 
     show_user_movies(){
@@ -185,10 +190,6 @@ class LogInMovieList extends React.Component {
       );
     }
 
-    delete(post){
-      this.props.dispatch(deletmovie(post));
-    }
-
     get_user_movies_part(){
       let text = "";
         text = (<div>
@@ -237,6 +238,7 @@ const mapStateToProps = state => {
     totalResults: state.logInmovieListReducer.totalResults,
     error: state.logInmovieListReducer.error,
     user: state.logInmovieListReducer.username,
+    password: state.logInmovieListReducer.password,
     loggedIn: state.logInmovieListReducer.loggedIn,
     user_movies: state.logInmovieListReducer.user_movies,
     show_user_movies_flag: state.logInmovieListReducer.show_user_movies_flag
