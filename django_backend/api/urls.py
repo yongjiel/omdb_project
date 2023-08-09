@@ -1,8 +1,7 @@
 
-from django.urls import path, include
+from django.urls import path, include, re_path
 
 from .views import (
-    MovieApiView,
     MoviesApiView,
     MovieRatingsApiView
 )
@@ -15,8 +14,7 @@ router.register(r'groups', GroupViewSet)
 
 
 urlpatterns = [
-    path('movies', MoviesApiView.as_view()),
-    path('movies/<str:id>', MovieApiView.as_view()),
+    re_path(r"^movies/?(?P<id>\w+)?", MoviesApiView.as_view(), name="get_movies"),
     path('ratings', MovieRatingsApiView.as_view()),
     path('', include(router.urls))
 ]

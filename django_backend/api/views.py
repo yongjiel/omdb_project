@@ -22,27 +22,20 @@ class MovieRatingsApiView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-class MovieApiView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
-    serializer_class = MovieSerializer
-
-    def get(self, request, id, *args, **kwargs):
-        movie = Movie.objects.get(imdbID=id)
-        setattr(movie, 'Ratings_set', movie.ratings.all())
-        serializer = MovieSerializer(movie)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-    
-    def delete(self, request, id, *args, **kwargs):
-        movie = Movie.objects.get(imdbID=id)
-        movie.delete()
-        return Response(None, status=204)
-
-
 class MoviesApiView(APIView):
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = MovieSerializer
 
-    def get(self, request, *args, **kwargs):
+    def get(self, request, id=None):
+        if id:
+            try:
+                movie = Movie.objects.get(imdbID=id)
+                setattr(movie, 'Ratings_set', movie.ratings.all())
+                serializer = MovieSerializer(movie)
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            except Exception as e:
+                return Response(str(e), status=status.HTTP_404_NOT_FOUND)
+
         movies = Movie.objects.all()
         for m in movies:
             setattr(m, 'Ratings_set', m.ratings.all())
@@ -72,10 +65,21 @@ class MoviesApiView(APIView):
 
             if ratings:
                 for r in ratings:
-                    Rating.objects.create(Source=r['Source'], Value=r['Value'], movie=m)
+                    try:
+                        Rating.objects.create(Source=r['Source'], Value=r['Value'], movie=m)
+                    except Exception as e:
+                        return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
 
             return Response(serializer.data, status=status.HTTP_201_CREATED)
     
+    def delete(self, request, id, *args, **kwargs):
+        if not id:
+            return Response("id must be defined.", status=status.HTTP_400_BAD_REQUEST)
+
+        movie = Movie.objects.get(imdbID=id)
+        movie.delete()
+        return Response(None, status=204)
+
 
 class UserViewSet(viewsets.ModelViewSet):
     """
