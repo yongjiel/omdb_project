@@ -5,6 +5,8 @@ from .views import (
     MoviesApiView,
     MovieRatingsApiView
 )
+
+from .view_test import TokenValidationView
 from rest_framework import routers
 from .views import UserViewSet, GroupViewSet
 
@@ -14,7 +16,8 @@ router.register(r'groups', GroupViewSet)
 
 
 urlpatterns = [
-    re_path(r"^movies/?(?P<id>\w+)?", MoviesApiView.as_view(), name="get_movies"),
+    re_path(r"^movies/?(?P<id>\w+)?", MoviesApiView.as_view(), name="get_movies",),
     path('ratings', MovieRatingsApiView.as_view()),
-    path('', include(router.urls))
+    path('', include(router.urls)),
+    path('validate-token/', TokenValidationView.as_view(), name='validate-token',)
 ]

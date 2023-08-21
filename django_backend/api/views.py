@@ -3,16 +3,20 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework import permissions
+from rest_framework.authentication import TokenAuthentication
 from django.contrib.auth.models import User, Group
 from .models import Movie, Rating
 from .serializers import (MovieSerializer, MovieRatingSerializer,
                          UserSerializer, GroupSerializer)
 import copy
 from rest_framework import viewsets
+from django.contrib.auth.decorators import permission_required
+from django.utils.decorators import method_decorator
 
 
 class MovieRatingsApiView(APIView):
     permission_classes = [permissions.IsAuthenticated]
+    authentication_classes = (TokenAuthentication,)
     serializer_class = MovieRatingSerializer
 
     def get(self, request, *args, **kwargs):
@@ -24,6 +28,7 @@ class MovieRatingsApiView(APIView):
 
 class MoviesApiView(APIView):
     permission_classes = [permissions.IsAuthenticated]
+    authentication_classes = (TokenAuthentication,)
     serializer_class = MovieSerializer
 
     def get(self, request, id=None):
