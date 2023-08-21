@@ -256,7 +256,7 @@ function getToken(value) {
   }).catch(
     error => {
       console.log(error);
-      return {error}
+      alert("Credential failure!");
     }
   );
 }
@@ -275,7 +275,7 @@ export function fetchUser(value) {
       .catch(
         error => {
           console.log(error);
-          dispatch(fetccUserFailure(error))
+          //alert(error)
         }
       );
   };
