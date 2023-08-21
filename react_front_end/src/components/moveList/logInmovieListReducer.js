@@ -28,8 +28,6 @@ import {
         page: 0,
         totalPages: 0,
         totalResults: 0,
-        username: null,
-        password: null,
         loggedIn: false,
         user_movies: [],
         user_mvoives_save: [],
@@ -82,8 +80,6 @@ import {
         case FETCH_USER_SUCCESS:
           return {
             ...state,
-            username: action.payload.username,
-            password: action.payload.password,
             loggedIn: true,
             error: null,
             show_user_movies_flag: false

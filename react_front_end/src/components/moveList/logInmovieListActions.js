@@ -1,4 +1,6 @@
 import axios from "axios";
+import Cookies from 'universal-cookie';
+export const cookies = new Cookies();
 
 export const FETCH_MOVIE_LIST_BEGIN   = 'FETCH_MOVIE_LIST_BEGIN';
 export const FETCH_MOVIE_LIST_SUCCESS = 'FETCH_MOVIE_LIST_SUCCESS';
@@ -99,9 +101,8 @@ export const fetccUserBegin = () => ({
   type: FETCH_USER_BEGIN
 });
 
-export const fetccUserSuccess = (username, password) => ({
-  type: FETCH_USER_SUCCESS,
-  payload: {username: username, password: password}
+export const fetccUserSuccess = () => ({
+  type: FETCH_USER_SUCCESS
 });
 
 export const fetccUserMovieSuccess = (movies) =>({
@@ -175,7 +176,7 @@ export function add_movie_entire_record(data){
   }
 }
 
-export function addmovie(post, username, password){
+export function addmovie(post){
   return dispatch => {
     dispatch(addMovie(post));
     const url = `https://www.omdbapi.com/?apikey=6ca48b3b&i=` + post.imdbID;
@@ -188,7 +189,7 @@ export function addmovie(post, username, password){
                         headers: {
                           'Content-type': 'application/json',
                           'Accept': 'application/json',
-                          'Authorization': 'Basic ' + btoa(username+":"+password),
+                          'Authorization': 'Token ' + cookies.get("token"),
                         },
                         method: "POST",
                         body: JSON.stringify(res.data)
@@ -209,7 +210,7 @@ export function addmovie(post, username, password){
   }
 }
 
-export function deletmovie(i, imdbID, username, password){
+export function deletmovie(i, imdbID){
   return dispatch => {
     dispatch(deleteMovie(i));
     const url = `http://127.0.0.1:8000/api/movies/`+imdbID;
@@ -218,7 +219,7 @@ export function deletmovie(i, imdbID, username, password){
                   headers: {
                     'Content-type': 'application/json',
                     'Accept': 'application/json',
-                    'Authorization': 'Basic ' + btoa(username+":"+password),
+                    'Authorization': 'Token ' + cookies.get("token"),
                   },
                   method: "DELETE"
                 })
@@ -243,28 +244,34 @@ export function showUsermovies(){
   }
 }
 
+
+function getToken(value) {
+  const url = `http://127.0.0.1:8000/dj-rest-auth/login/?format=json`;
+  return axios.post(url, {
+    username: value.username,
+    password: value.password
+  }).then(res=>{
+    console.log(res);
+    return res.data;
+  }).catch(
+    error => {
+      console.log(error);
+      return {error}
+    }
+  );
+}
+
 export function fetchUser(value) {
   return dispatch => {
     dispatch(fetccUserBegin(value));
-    const url = `http://127.0.0.1:8000/api/users/?format=json`;
-    return fetch(url
-            ,{
-              headers: {
-                'Content-type': 'application/json',
-                'Accept': 'application/json',
-                'Authorization': 'Basic ' + btoa(value.username + ":" + value.password),
-              },
-              credentials: 'same-origin'
-            })
-      .then(res => {
-        if (res.status === 200) {
-            dispatch(fetccUserSuccess(value.username, value.password));
-            return {username: value.username, password: value.password};
-        } else {
-          dispatch(fetccUserFailure("User credential not correct!"))
-        }
-        
-      })
+    
+    return getToken(value)
+        .then(data => {
+              console.log(data);
+              cookies.set('token', data.key);
+              dispatch(fetccUserSuccess(data.key))
+              return data;
+          })
       .catch(
         error => {
           console.log(error);

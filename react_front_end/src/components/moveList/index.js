@@ -4,7 +4,7 @@ import SearchBox from "../searchBox";
 import { 
     fetchMovieList, fetchUser, logout,
     addmovie, showUsermovies, backtoSearchPart,
-    deletmovie, closemodal, openmodal} from "./logInmovieListActions";
+    deletmovie, closemodal, openmodal, cookies} from "./logInmovieListActions";
 import { Formik, Field, Form } from "formik";
 import Modal from "react-modal";
 
@@ -38,13 +38,13 @@ class LogInMovieList extends React.Component {
     }
 
     save(post){
-      this.props.dispatch(addmovie(post, this.props.user, this.props.password));
+      this.props.dispatch(addmovie(post));
     }
 
     delete(post){
       if(window.confirm('Are you sure to delete this record?')){ 
         let index = this.props.user_movies.indexOf(post);
-        this.props.dispatch(deletmovie(index, post.imdbID, this.props.user, this.props.password));
+        this.props.dispatch(deletmovie(index, post.imdbID));
       }
     }
 
@@ -54,8 +54,8 @@ class LogInMovieList extends React.Component {
 
     checkUserList(){
         if (!!this.props.user_movies && this.props.user_movies.length >= 5){
-          const text = (<p style={{backgroundColor: "#F9D1C9"}}> User {this.props.user} has 5 or more records! Please check <button
-            onClick={this.show_user_movies} style={{border: "0px", backgroundColor: "#DAFCF7"}}>{this.props.user}&lsquo;s movies</button></p>);
+          const text = (<p style={{backgroundColor: "#F9D1C9"}}> User has 5 or more records! Please check <button
+            onClick={this.show_user_movies} style={{border: "0px", backgroundColor: "#DAFCF7"}}>User&lsquo;s movies</button></p>);
 
           return text;
         }
@@ -74,6 +74,7 @@ class LogInMovieList extends React.Component {
     }
 
     logout(){
+      cookies.remove("token")
       this.props.dispatch(logout());
       window.location.replace("/");
     }
@@ -174,7 +175,7 @@ class LogInMovieList extends React.Component {
         <div>
           {this.show_logout_button()}&nbsp;
           <button
-            onClick={this.show_user_movies} style={{border: "0px", backgroundColor: "#DAFCF7"}}>{this.props.user}&lsquo;s movies</button>
+            onClick={this.show_user_movies} style={{border: "0px", backgroundColor: "#DAFCF7"}}>User&lsquo;s movies</button>
           {this.checkUserList()}
           <h1>Search Movie List. </h1>
           <SearchBox handleSearchSubmit={this.handleSearchSubmit}/>
@@ -205,7 +206,7 @@ class LogInMovieList extends React.Component {
         text = (<div>
                 {this.show_logout_button()}&nbsp;
                 <button onClick={this.show_search_part}  style={{border: "0px", backgroundColor: "#DAFCF7"}}> Back to search </button>
-                <h1>Hi,{this.props.user}, your Movie List. </h1>
+                <h1>Hi, User, your Movie List. </h1>
                 <table key='table'>
                 <tbody key='tbody'>
                 <tr key='head_row'><th style={{textAlign: 'left'}}>Title</th><th style={{textAlign: 'left'}}>Year</th><th>Delete?</th></tr>
@@ -302,7 +303,7 @@ class LogInMovieList extends React.Component {
     render() {
       if (this.props.show_user_movies_flag){
         return this.get_user_movies_part();
-      }else if (!!this.props.user ){
+      }else if (!!cookies.get("token") ){
           return this.get_search_part();
       }else{
           return this.get_login_part();
@@ -321,8 +322,6 @@ const mapStateToProps = state => {
     totalPages: state.logInmovieListReducer.totalPages,
     totalResults: state.logInmovieListReducer.totalResults,
     error: state.logInmovieListReducer.error,
-    user: state.logInmovieListReducer.username,
-    password: state.logInmovieListReducer.password,
     loggedIn: state.logInmovieListReducer.loggedIn,
     user_movies: state.logInmovieListReducer.user_movies,
     show_user_movies_flag: state.logInmovieListReducer.show_user_movies_flag,
