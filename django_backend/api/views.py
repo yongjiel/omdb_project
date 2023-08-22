@@ -5,13 +5,14 @@ from rest_framework import status
 from rest_framework import permissions
 from rest_framework.authentication import TokenAuthentication
 from django.contrib.auth.models import User, Group
-from .models import Movie, Rating
+from .models import Movie, Rating, UserMovie
 from .serializers import (MovieSerializer, MovieRatingSerializer,
                          UserSerializer, GroupSerializer)
 import copy
 from rest_framework import viewsets
 from django.contrib.auth.decorators import permission_required
 from django.utils.decorators import method_decorator
+from rest_framework.authtoken.models import Token
 
 
 class MovieRatingsApiView(APIView):
@@ -75,16 +76,33 @@ class MoviesApiView(APIView):
                     except Exception as e:
                         return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
 
+            user = self._get_user_by_token(request)
+            try:
+                UserMovie.objects.create(user=user, movie=m)
+            except Exception as e:
+                print(str(e))
+                return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
+
             return Response(serializer.data, status=status.HTTP_201_CREATED)
     
     def delete(self, request, id, *args, **kwargs):
         if not id:
             return Response("id must be defined.", status=status.HTTP_400_BAD_REQUEST)
-
         movie = Movie.objects.get(imdbID=id)
+        user = self._get_user_by_token(request)
+        try:
+            uv = UserMovie.objects.get(user=user, movie=movie)
+            uv.delete()
+        except Exception as e:
+            print(str(e))
+            return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
         movie.delete()
         return Response(None, status=204)
-
+    
+    def _get_user_by_token(self, request):
+        tok = request.META.get('HTTP_AUTHORIZATION').replace("Token ", "")
+        token = Token.objects.get(key=tok)
+        return User.objects.get(id=token.user_id)
 
 class UserViewSet(viewsets.ModelViewSet):
     """
