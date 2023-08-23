@@ -3,7 +3,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework import permissions
-from rest_framework.authentication import TokenAuthentication
+from rest_framework.authentication import TokenAuthentication, SessionAuthentication, BasicAuthentication
 from django.contrib.auth.models import User, Group
 from .models import Movie, Rating, UserMovie
 from .serializers import (MovieSerializer, MovieRatingSerializer,
@@ -16,14 +16,19 @@ from rest_framework.authtoken.models import Token
 
 
 def _get_user_by_token(request):
-    tok = request.META.get('HTTP_AUTHORIZATION').replace("Token ", "")
-    token = Token.objects.get(key=tok)
-    return User.objects.get(id=token.user_id)
+    if hasattr(request, 'user'):
+        return request.user
+    if request.META.get('HTTP_AUTHORIZATION', None):
+        tok = request.META.get('HTTP_AUTHORIZATION').replace("Token ", "")
+        token = Token.objects.get(key=tok)
+        return User.objects.get(id=token.user_id)
+    else:
+        raise Exception("No user/token found.")
 
 
 class UserMoviesApiView(APIView):
     permission_classes = [permissions.IsAuthenticated]
-    authentication_classes = (TokenAuthentication,)
+    authentication_classes = (TokenAuthentication,SessionAuthentication)
     serializer_class = MovieSerializer
 
     def get(self, request, *args, **kwargs):
@@ -50,7 +55,7 @@ class MovieRatingsApiView(APIView):
 
 class MoviesApiView(APIView):
     permission_classes = [permissions.IsAuthenticated]
-    authentication_classes = (TokenAuthentication,)
+    authentication_classes = (TokenAuthentication,SessionAuthentication)
     serializer_class = MovieSerializer
 
     def get(self, request, id=None):
@@ -115,8 +120,8 @@ class MoviesApiView(APIView):
             uv.delete()
         except Exception as e:
             print(str(e))
-            return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
-        #movie.delete()
+            #return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
+        movie.delete()
         return Response(None, status=204)
 
 
