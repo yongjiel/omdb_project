@@ -6,6 +6,11 @@ from .views import (
     MovieRatingsApiView,
     UserMoviesApiView
 )
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+    TokenRefreshView,
+    TokenVerifyView
+)
 
 from .view_test import TokenValidationView
 from rest_framework import routers
@@ -20,5 +25,8 @@ urlpatterns = [
     path('ratings', MovieRatingsApiView.as_view()),
     path('', include(router.urls)),
     path('validate-token/', TokenValidationView.as_view(), name='validate-token',),
-    re_path(r'^userlist/?', UserMoviesApiView.as_view(), name='user-movie-list',)
+    re_path(r'^userlist/?', UserMoviesApiView.as_view(), name='user-movie-list',),
+    path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('token/verify/', TokenVerifyView.as_view(), name='token_verify'),
 ]

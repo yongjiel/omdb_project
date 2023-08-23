@@ -3,7 +3,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework import permissions
-from rest_framework.authentication import TokenAuthentication, SessionAuthentication, BasicAuthentication
+from rest_framework.authentication import TokenAuthentication, SessionAuthentication
+from rest_framework_simplejwt.authentication import JWTAuthentication
 from django.contrib.auth.models import User, Group
 from .models import Movie, Rating, UserMovie
 from .serializers import (MovieSerializer, MovieRatingSerializer,
@@ -16,6 +17,10 @@ from rest_framework.authtoken.models import Token
 
 
 def _get_user_by_token(request):
+    print(request)
+    if hasattr(request, 'user') and hasattr( request.user, "username"): # simplejwt
+        username = request.user.username
+        return User.objects.filter(username=username).first()
     if hasattr(request, 'user'):
         return request.user
     if request.META.get('HTTP_AUTHORIZATION', None):
@@ -28,10 +33,11 @@ def _get_user_by_token(request):
 
 class UserMoviesApiView(APIView):
     permission_classes = [permissions.IsAuthenticated]
-    authentication_classes = (TokenAuthentication,SessionAuthentication)
+    authentication_classes = (JWTAuthentication,TokenAuthentication,SessionAuthentication)
     serializer_class = MovieSerializer
 
     def get(self, request, *args, **kwargs):
+        print("//.//////")
         user = _get_user_by_token(request)
         print(user.id)
         uvs = UserMovie.objects.filter(user=user).all()
@@ -43,7 +49,7 @@ class UserMoviesApiView(APIView):
 
 class MovieRatingsApiView(APIView):
     permission_classes = [permissions.IsAuthenticated]
-    authentication_classes = (TokenAuthentication,)
+    authentication_classes = (JWTAuthentication, TokenAuthentication,SessionAuthentication)
     serializer_class = MovieRatingSerializer
 
     def get(self, request, *args, **kwargs):
@@ -55,7 +61,7 @@ class MovieRatingsApiView(APIView):
 
 class MoviesApiView(APIView):
     permission_classes = [permissions.IsAuthenticated]
-    authentication_classes = (TokenAuthentication,SessionAuthentication)
+    authentication_classes = (JWTAuthentication, TokenAuthentication,SessionAuthentication)
     serializer_class = MovieSerializer
 
     def get(self, request, id=None):
@@ -79,24 +85,16 @@ class MoviesApiView(APIView):
         print(data)
         m = None
         serializer = MovieSerializer(data=data)
-        # created, if not created, will throw exception
-        
         m = Movie.objects.filter(imdbID=data['imdbID']).first()
         if not m:
-            ratings = None
-            if "Ratings" in data:
-                ratings = copy.deepcopy(data['Ratings'])
-                del data['Ratings']
-                serializer = MovieSerializer(data=data)
-
             if serializer.is_valid():
                 m = serializer.save()
             else:
                 print(serializer.errors)
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-            if ratings:
-                for r in ratings:
+            if 'Ratings' in data:
+                for r in data['Ratings']:
                     try:
                         Rating.objects.create(Source=r['Source'], Value=r['Value'], movie=m)
                     except Exception as e:

@@ -189,7 +189,7 @@ export function addmovie(post){
                         headers: {
                           'Content-type': 'application/json',
                           'Accept': 'application/json',
-                          'Authorization': 'Token ' + cookies.get("token"),
+                          'Authorization': 'Bearer ' + cookies.get("token"),
                         },
                         method: "POST",
                         body: JSON.stringify(res.data)
@@ -219,7 +219,7 @@ export function deletmovie(i, imdbID){
                   headers: {
                     'Content-type': 'application/json',
                     'Accept': 'application/json',
-                    'Authorization': 'Token ' + cookies.get("token"),
+                    'Authorization': 'Bearer ' + cookies.get("token"),
                   },
                   method: "DELETE"
                 })
@@ -246,7 +246,7 @@ export function showUsermovies(){
 
 
 function getToken(value) {
-  const url = `http://127.0.0.1:8000/dj-rest-auth/login/?format=json`;
+  const url = `http://localhost:8000/api/token/?format=json`;
   return axios.post(url, {
     username: value.username,
     password: value.password
@@ -264,7 +264,10 @@ function getToken(value) {
  function getUserMovieList(token){
   const url = "http://127.0.0.1:8000/api/userlist/?format=json";
   const config = {
-    headers: { Authorization: `Token ${token}` }
+    headers: { 
+      //Authorization: `Token ${token}` // for normal token
+      Authorization: `Bearer ${token}`
+    }  
   };
   return axios.get(url, config)
           .then(res=>{
@@ -315,7 +318,8 @@ export function fetchUser(value, mvs, navigate, uri) {
     
     getToken(value)
         .then(data => {
-              dispatch(get_movie_list(data.key,mvs, navigate, uri));
+          dispatch(get_movie_list(data.access, mvs, navigate, uri)); // for jwt token
+          //    dispatch(get_movie_list(data.key, mvs, navigate, uri)); // for normal token
               //dispatch(fetchUserMovieSuccess(mvss)); //search_movies for loading 10 records from source site.
               return data.key;
           })
