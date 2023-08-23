@@ -76,19 +76,23 @@ class MoviesApiView(APIView):
 
     def post(self, request, *args, **kwargs):
         data = request.data
+        print(data)
         m = None
         serializer = MovieSerializer(data=data)
         # created, if not created, will throw exception
+        
         m = Movie.objects.filter(imdbID=data['imdbID']).first()
-        if not m: 
+        if not m:
             ratings = None
             if "Ratings" in data:
                 ratings = copy.deepcopy(data['Ratings'])
                 del data['Ratings']
+                serializer = MovieSerializer(data=data)
 
             if serializer.is_valid():
                 m = serializer.save()
             else:
+                print(serializer.errors)
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
             if ratings:
@@ -108,18 +112,22 @@ class MoviesApiView(APIView):
                 return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
 
         serializer = MovieSerializer(m)
+        print(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     
     def delete(self, request, id, *args, **kwargs):
         if not id:
             return Response("id must be defined.", status=status.HTTP_400_BAD_REQUEST)
-        movie = Movie.objects.get(imdbID=id)
+        
+        movie = Movie.objects.filter(imdbID=id).first()
+        if not movie:
+            return Response(None, status=204)
         user = _get_user_by_token(request)
-        try:
-            uv = UserMovie.objects.get(user=user, movie=movie)
+        uv = UserMovie.objects.filter(user=user, movie=movie).first()
+        if uv:
             uv.delete()
-        except Exception as e:
-            print(str(e))
+        else:
+            print("No userlist {} {} exists".format(user.id, movie.imdbID))
             #return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
         movie.delete()
         return Response(None, status=204)

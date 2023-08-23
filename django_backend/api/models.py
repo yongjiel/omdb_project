@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 class Movie(models.Model):
     Title = models.CharField(max_length = 180)
     Year = models.CharField(max_length = 180)
-    Rated = models.CharField(max_length = 5)
+    Rated = models.CharField(max_length = 25)
     Released = models.CharField(max_length = 30)
     Runtime = models.CharField(max_length = 30)
     Genre = models.CharField(max_length = 50)
