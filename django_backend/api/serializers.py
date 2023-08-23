@@ -1,6 +1,12 @@
 from rest_framework import serializers
-from .models import Movie, Rating
+from .models import Movie, Rating, UserMovie
 from django.contrib.auth.models import User, Group
+
+
+class UserMoviesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserMovie
+        fields = '__all__'
 
 
 class MovieRatingSerializer(serializers.ModelSerializer):

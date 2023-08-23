@@ -1,8 +1,8 @@
 import React from "react";
 import { connect } from "react-redux";
-import LogIn from "./login";
 import MovieList from "./movielist";
-import UserMovieList from "./usermovielist";
+import { cookies} from "./logInmovieListActions";
+
 
 class LogInMovieList extends React.Component {
     constructor(props) {
@@ -10,14 +10,7 @@ class LogInMovieList extends React.Component {
     }
 
     render() {
-      if (this.props.show_user_movies_flag){
-        return <UserMovieList />;
-      }else if (this.props.loggedIn ){
-          return <MovieList />;
-      }else{
-          return <LogIn />;
-      }
-
+        return <MovieList navigate={this.props.navigate}/>;
     }
 
 }
@@ -27,6 +20,8 @@ const mapStateToProps = state => {
   return {
     show_user_movies_flag: state.logInmovieListReducer.show_user_movies_flag,
     loggedIn: state.logInmovieListReducer.loggedIn,
+    user_movies: state.logInmovieListReducer.user_movies,
+    error: state.logInmovieListReducer.error
   };
 };
 

@@ -15,6 +15,7 @@ class ToSearchList extends React.Component {
 
     show_search_part(){
         this.props.dispatch(backtoSearchPart());
+        this.props.navigate("/search");
     }
     
     render() {

@@ -13,7 +13,7 @@ class LogOut extends React.Component {
     logout(){
       cookies.remove("token")
       this.props.dispatch(logout());
-      window.location.replace("/");
+      this.props.navigate("/login");
     }
 
     render() {

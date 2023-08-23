@@ -11,16 +11,14 @@ class LogIn extends React.Component {
       this.get_login_part = this.get_login_part.bind(this);
     }
 
-    login(){
-      window.location.replace("/");
-    }
-
-    get_user(values){
-      this.props.dispatch(fetchUser(values));
+    get_user_and_movies(values){
+      this.props.dispatch(
+            fetchUser(values, this.props.user_movies, this.props.navigate, "/search")
+        );
     }
 
     handleLogInSubmit(values){
-      this.get_user(values);
+      this.get_user_and_movies(values);
     }
   
     get_login_content(){
@@ -78,6 +76,7 @@ class LogIn extends React.Component {
 const mapStateToProps = state => {
   return {
     error: state.logInmovieListReducer.error,
+    user_movies: state.logInmovieListReducer.user_movies
   };
 };
 

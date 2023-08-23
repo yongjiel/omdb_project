@@ -105,12 +105,12 @@ export const fetccUserSuccess = () => ({
   type: FETCH_USER_SUCCESS
 });
 
-export const fetccUserMovieSuccess = (movies) =>({
+export const fetchUserMovieSuccess = (movies) =>({
   type: FETCH_USER_MOVIE_SUCCESS,
   payload: {movies}
 });
 
-export const addMovie = (post) =>({
+export const addMovieToUserMovies = (post) =>({
   type: ADD_MOVIE,
   payload: {post}
 });
@@ -178,7 +178,7 @@ export function add_movie_entire_record(data){
 
 export function addmovie(post){
   return dispatch => {
-    dispatch(addMovie(post));
+    dispatch(addMovieToUserMovies(post));
     const url = `https://www.omdbapi.com/?apikey=6ca48b3b&i=` + post.imdbID;
     axios.get(url)
           .then(res => {
@@ -256,27 +256,75 @@ function getToken(value) {
   }).catch(
     error => {
       console.log(error);
-      alert("Credential failure!");
+      return "Could not get token";
     }
   );
 }
 
-export function fetchUser(value) {
+ function getUserMovieList(token){
+  const url = "http://127.0.0.1:8000/api/userlist/?format=json";
+  const config = {
+    headers: { Authorization: `Token ${token}` }
+  };
+  return axios.get(url, config)
+          .then(res=>{
+            return res.data;
+          })
+          .catch(
+            error => {
+              console.log(error);
+            }
+          );
+}
+
+function is_not_in_user_movies(mvs, id){
+  return mvs.filter(m => m.imdbID === id).length === 0;
+}
+
+export function get_movie_list(token, mvs, navigate, uri) {
+  return dispatch => {
+    if (token === null){
+      dispatch(fetccUserFailure("Could not get user's movies"));
+      return;
+    }
+    getUserMovieList(token)
+    .then(movies=> {
+      movies.map(m => {
+        if ( is_not_in_user_movies(mvs, m.imdbID) ){
+          dispatch(addmovie(m));
+        }
+      });
+      cookies.set('token', token);
+      dispatch(fetccUserSuccess());
+      if (navigate !== null){
+        navigate(uri);
+      }
+      return movies;
+    }).catch(
+      error => {
+        console.log(error);
+        dispatch(fetccUserFailure("Could not get user's movies"));
+      }
+    );
+  };
+}
+
+export function fetchUser(value, mvs, navigate, uri) {
   return dispatch => {
     dispatch(fetccUserBegin(value));
     
-    return getToken(value)
+    getToken(value)
         .then(data => {
-              console.log(data);
-              cookies.set('token', data.key);
-              dispatch(fetccUserSuccess(data.key))
-              return data;
+              dispatch(get_movie_list(data.key,mvs, navigate, uri));
+              //dispatch(fetchUserMovieSuccess(mvss)); //search_movies for loading 10 records from source site.
+              return data.key;
           })
       .catch(
         error => {
           console.log(error);
-          //alert(error)
+          dispatch(fetccUserFailure(error));
         }
       );
   };
+
 }

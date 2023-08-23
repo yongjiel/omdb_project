@@ -5,6 +5,7 @@ import {
     fetchMovieList, addmovie, backtoSearchPart} from "./logInmovieListActions";
     import LogOut from "./logout";
 import ToUserMovieList from "./touserlist";
+import { cookies, get_movie_list, fetccUserFailure } from "./logInmovieListActions";
 
 class MovieList extends React.Component {
     constructor(props) {
@@ -13,11 +14,12 @@ class MovieList extends React.Component {
       this.save = this.save.bind(this);
       this.get_search_part = this.get_search_part.bind(this);
       this.checkUserList = this.checkUserList.bind(this);
+      this.first_time= true;
     }
 
     checkUserList(){
       if (!!this.props.user_movies && this.props.user_movies.length >= 5){
-        const text = (<p style={{backgroundColor: "#F9D1C9"}}> User has 5 or more records! Please check <ToUserMovieList/></p>);
+        const text = (<p style={{backgroundColor: "#F9D1C9"}}> User has 5 or more records! Please check <ToUserMovieList navigate={this.props.navigate}/></p>);
 
         return text;
       }
@@ -36,12 +38,15 @@ class MovieList extends React.Component {
     }
 
     save(post){
-      this.props.dispatch(addmovie(post));
+      if ( this.props.user_movies.filter(m => m.imdbID === post.imdbID).length === 0 ){
+        this.props.dispatch(addmovie(post));
+      }
+      
     }
 
 
     show_logout_button(){
-        return <LogOut />;            
+        return <LogOut navigate={this.props.navigate}/>;            
     }
 
     show_search_part(){
@@ -91,7 +96,7 @@ class MovieList extends React.Component {
       return (
         <div>
           {this.show_logout_button()}&nbsp;
-          <ToUserMovieList/>
+          <ToUserMovieList navigate={this.props.navigate}/>
           {this.checkUserList()}
           <h1>Search Movie List. </h1>
           <SearchBox handleSearchSubmit={this.handleSearchSubmit}/>
@@ -113,9 +118,36 @@ class MovieList extends React.Component {
       );
     }
 
-    
+    refetch_user_movie_list(token){
+      if (token === null){
+        this.props.dispatch(fetccUserFailure("Could not get user's movies"));
+      }
+      this.props.dispatch(get_movie_list(token, this.props.user_movies, null, null));
+    }
     
     render() {
+          if (this.props.user_movies.length === 0 && !! this.first_time){
+            let token = null;
+            if (!!cookies.get('token')){
+              token = cookies.get('token');
+              this.refetch_user_movie_list(token);
+            } else{
+              if (this.props.loading){
+                this.refetch_user_movie_list(token);
+                return <><p>Loading......</p></>;
+              }
+              else if (!this.props.loggedIn){
+                return <><p>Please <a href="/login">login</a> first.</p></>;
+              }
+            }
+            
+            //alert("loading " + this.props.loading)
+            //alert("error " + this.props.error )
+            
+            
+            this.first_time = false;
+          }
+          //alert("2222error " + this.props.error )
           return this.get_search_part();
     }
 
@@ -131,6 +163,8 @@ const mapStateToProps = state => {
     totalResults: state.logInmovieListReducer.totalResults,
     error: state.logInmovieListReducer.error,
     user_movies: state.logInmovieListReducer.user_movies,
+    userMovieListFromDB: state.logInmovieListReducer.userMovieListFromDB,
+    loading: state.logInmovieListReducer.loading
   };
 };
 

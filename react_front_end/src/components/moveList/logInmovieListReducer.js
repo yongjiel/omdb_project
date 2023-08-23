@@ -35,7 +35,9 @@ import {
         error: null,
         show_user_movies_flag: false,
         isOpenModal: false,
-        modalImdbID: null
+        modalImdbID: null,
+        userMovieListFromDB: [],
+        loading: true
   };
   
   export default function logInmovieListReducer(state = initialState, action) {
@@ -82,14 +84,16 @@ import {
             ...state,
             loggedIn: true,
             error: null,
-            show_user_movies_flag: false
+            show_user_movies_flag: false,
+            loading: false,
           };
     
       case FETCH_USER_MOVIE_SUCCESS:
         return {
           ...state,
           user_movies: action.payload.movies,
-          show_user_movies_flag: false
+          loading: false,
+          error: null
         };
   
       case FETCH_USER_FAILURE:
@@ -97,7 +101,8 @@ import {
           ...state,
           loggedIn: false,
           error: action.payload.error,
-          show_user_movies_flag: false
+          show_user_movies_flag: false,
+          loading: false
         };
 
       case LOG_OUT:

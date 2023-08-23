@@ -1,12 +1,12 @@
 import React from "react";
 import { connect } from "react-redux";
 import { 
-    showUsermovies, backtoSearchPart,
-    deletmovie, closemodal, openmodal} from "./logInmovieListActions";
+    showUsermovies, deletmovie, closemodal, openmodal} 
+    from "./logInmovieListActions";
 import Modal from "react-modal";
 import LogOut from "./logout";
 import ToSearchList from "./tosearch";
-
+import { cookies, get_movie_list, fetccUserFailure } from "./logInmovieListActions";
 
 class UserMovieList extends React.Component {
     constructor(props) {
@@ -16,6 +16,7 @@ class UserMovieList extends React.Component {
       this.close_modal = this.close_modal.bind(this);
       this.open_modal = this.open_modal.bind(this);
       this.show_modal = this.show_modal.bind(this);
+      this.first_time= true;
     }
 
     delete(post){
@@ -41,7 +42,7 @@ class UserMovieList extends React.Component {
     }
    
     show_logout_button(){
-        return <LogOut />;            
+        return <LogOut navigate={this.props.navigate}/>;            
     }
 
     open_modal(imdbID){
@@ -52,7 +53,7 @@ class UserMovieList extends React.Component {
       let text = "";
         text = (<div>
                 {this.show_logout_button()}&nbsp;
-                <ToSearchList/>
+                <ToSearchList navigate={this.props.navigate}/>
                 <h1>Hi, User, your Movie List. </h1>
                 <table key='table'>
                 <tbody key='tbody'>
@@ -147,8 +148,46 @@ class UserMovieList extends React.Component {
       );
     }
     
+    refetch_user_movie_list(token){
+        if (token === null){
+            this.props.dispatch(fetccUserFailure("Could not get user's movies"));
+          }
+        this.props.dispatch(get_movie_list(token, this.props.user_movies, null,null));
+      }
+
     render() {
+        
+        if (this.props.user_movies.length === 0 && !! this.first_time){
+            let token = null;
+            if (!!cookies.get('token')){
+              token = cookies.get('token');
+              
+              if (!this.props.loading){
+                // do not need to refetch user movies again. in /search did it. 
+                // after log in, it goes to /search automatically. user_movies is filled up.
+                // if refectch again, the last one in user_movies will trigger the django
+                // /userlist again to get the non-deleted record back. the refetch and 
+                // /movies/<id> (HTTP DELETE ) competing.
+                //this.refetch_user_movie_list(token);
+              }
+            } else{
+              if (this.props.loading){
+                this.refetch_user_movie_list(token);
+                return <><p>Loading......</p></>;
+              }
+              else if (!this.props.loggedIn){
+                return <><p>Please <a href="/login">login</a> first.</p></>;
+              }
+            }
+            
+            //alert("loading " + this.props.loading)
+            //alert("error " + this.props.error )
+            
+            
+            this.first_time = false;
+          }
         return this.get_user_movies_part();
+        
     }
 
 }
@@ -160,7 +199,9 @@ const mapStateToProps = state => {
     user_movies: state.logInmovieListReducer.user_movies,
     isOpenModal: state.logInmovieListReducer.isOpenModal,
     user_movies_entire_records: state.logInmovieListReducer.user_movies_entire_records,
-    modalImdbID: state.logInmovieListReducer.modalImdbID
+    modalImdbID: state.logInmovieListReducer.modalImdbID,
+    loading: state.logInmovieListReducer.loading,
+    loggedIn: state.logInmovieListReducer.loggedIn
   };
 };
 

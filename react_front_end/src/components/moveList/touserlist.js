@@ -12,6 +12,7 @@ class ToUserMovieList extends React.Component {
     
     show_user_movies(){
         this.props.dispatch(showUsermovies());
+        this.props.navigate("/userlist");
      }
     
     render() {
