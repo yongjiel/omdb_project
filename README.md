@@ -1,3 +1,15 @@
+=== Introduction ====
+This is a demo project for react front-end and django backend.
+Front end will grap the data from OMDB and show the list of records.
+When clicke 'Save', the data record will be saved into django backend.
+also with the hook up of user records. So when next time, user logins 
+or restart server, the memory of user's movie list is still able to 
+be used in front end.  When click delete, data record will be removed
+in django back end and also from the user's list.
+The maximum of records for one user is 5. When reaches 5, it will disable
+all the save button clicks until user's list is less than 5. 
+
+
 ==== For front end boot up ====
 1. cd  react_front_end
 2.  npm install

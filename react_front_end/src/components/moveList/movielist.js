@@ -39,7 +39,7 @@ class MovieList extends React.Component {
 
     save(post){
       if ( this.props.user_movies.filter(m => m.imdbID === post.imdbID).length === 0 ){
-        this.props.dispatch(addmovie(post));
+        this.props.dispatch(addmovie(post, this.props.navigate));
       }
       
     }

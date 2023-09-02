@@ -176,7 +176,7 @@ export function add_movie_entire_record(data){
   }
 }
 
-export function addmovie(post){
+export function addmovie(post, navigate){
   return dispatch => {
     dispatch(addMovieToUserMovies(post));
     const url = `https://www.omdbapi.com/?apikey=6ca48b3b&i=` + post.imdbID;
@@ -198,7 +198,14 @@ export function addmovie(post){
                 if ( [200, 201].includes(res.status) ) {
                     dispatch(addMovieSuccess());
                 } else {
-                    dispatch(addMovieFailure())
+                    if ( [401].includes(res.status) ) {
+                      alert("Token timeout! Back to login")
+                      dispatch(logOut());
+                      navigate("/login");
+                    }else{
+                      dispatch(addMovieFailure());
+                    }
+                   
                 }
               })
               .catch(
@@ -210,7 +217,7 @@ export function addmovie(post){
   }
 }
 
-export function deletmovie(i, imdbID){
+export function deletmovie(i, imdbID, navigate){
   return dispatch => {
     dispatch(deleteMovie(i));
     const url = `http://127.0.0.1:8000/api/movies/`+imdbID;
@@ -227,7 +234,14 @@ export function deletmovie(i, imdbID){
                 if ( [204].includes(res.status) ) {
                     dispatch(deleteMovieSuccess());
                 } else {
-                    dispatch(deleteMovieFailure())
+                    if ( [401].includes(res.status) ){
+                      alert("Token timeout! Back to login");
+                      dispatch(logOut());
+                      navigate('/login');
+                    }else{
+                      dispatch(deleteMovieFailure());
+                    }
+                    
                 }
               })
               .catch(

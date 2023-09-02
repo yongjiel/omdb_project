@@ -22,7 +22,7 @@ class UserMovieList extends React.Component {
     delete(post){
       if(window.confirm('Are you sure to delete this record?')){ 
         let index = this.props.user_movies.indexOf(post);
-        this.props.dispatch(deletmovie(index, post.imdbID));
+        this.props.dispatch(deletmovie(index, post.imdbID, this.props.navigate));
       }
     }
 
