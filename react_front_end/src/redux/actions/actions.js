@@ -1,8 +1,16 @@
+import {
+  fetchMoviesByPageNumber
+
+} from "../api/todo-api";
+
 import axios from "axios";
 import Cookies from 'universal-cookie';
 export const cookies = new Cookies();
 
+
+
 export const FETCH_MOVIE_LIST_BEGIN   = 'FETCH_MOVIE_LIST_BEGIN';
+export const FETCH_MOVIE_IN_PROGRESS = 'FETCH_MOVIE_IN_PROGRESS';
 export const FETCH_MOVIE_LIST_SUCCESS = 'FETCH_MOVIE_LIST_SUCCESS';
 export const FETCH_MOVIE_LIST_FAILURE = 'FETCH_MOVIE_LIST_FAILURE';
 export const FETCH_MOVIE_LIST_SUCCESS_EMPTY_RESULT = 'FETCH_MOVIE_LIST_SUCCESS_EMPTY_RESULT';
@@ -12,6 +20,11 @@ export const fetchMovieListBegin = (text, page) => ({
   type: FETCH_MOVIE_LIST_BEGIN,
   payload: {search_text: text,
             page: page}
+});
+
+export const fetchMovieListInProgress = (payload) => ({
+  type: FETCH_MOVIE_IN_PROGRESS,
+  payload: payload
 });
 
 export const fetchMovieListSuccess = state => ({
@@ -39,6 +52,23 @@ export function backtoSearchPart() {
   }
 }
 
+function fetchMoviesByPage(moviePartialText, page) {
+  
+  return async(dispatch) => {
+    
+    try{
+      const st = await fetchMoviesByPageNumber(moviePartialText, page)
+      dispatch(fetchMovieListSuccess(st));
+      if (st.page !== st.totalPages){
+        dispatch(fetchMovieListInProgress({page: st.page}));
+      }
+    }catch(error){
+        dispatch(fetchMovieListFailure({error: error.message}));
+    };
+
+  }
+}
+
 export function fetchMovieList(text, page) {
   return dispatch => {
     if (! text){
@@ -46,28 +76,7 @@ export function fetchMovieList(text, page) {
       return;
     }
     dispatch(fetchMovieListBegin(text, page));
-    const url = `https://www.omdbapi.com/?apikey=6ca48b3b&type=movie&s=`+text+`&page=`+ page;
-    axios.get(url)
-          .then(res => {
-            if (res.data.hasOwnProperty('Error') && !!res.data.Error){
-              dispatch(fetchMovieListSuccessEmptyResult(res.data.Error));
-              return res.data;
-            }else{
-              const newPosts = res.data.Search;
-              const totalPages = Math.ceil(res.data.totalResults/10.0);
-              const state = {search_text: text,
-                            search_movies: newPosts,
-                            page: page,
-                            totalPages: totalPages,
-                            totalResults: res.data.totalResults,
-                            error: null}
-              dispatch(fetchMovieListSuccess(state));
-              return state;
-            }
-            
-          }).catch(error => {
-            dispatch(fetchMovieListFailure({error: error.message}));
-          });
+    dispatch(fetchMoviesByPage(text, page));
   };
 }
 
@@ -87,6 +96,7 @@ export const DELETE_MOIVIE_SUCCESS = 'DELETE_MOIVIE_SUCCESS';
 export const ADD_MOVIE_ENTIRE_RECORD = 'ADD_MOVIE_ENTIRE_RECORD';
 export const CLOSE_MODAL = "CLOSE_MODAL";
 export const OPEN_MODAL = "OPEN_MODAL";
+export const CLEAR_SEARCH_MOVIES = "CLEAR_SEARCH_MOVIES";
 
 export const closeModal = () => ({
   type: CLOSE_MODAL
@@ -127,6 +137,9 @@ export const showUserMovies = ()=> ({
   type: SHOW_USER_MOVIES
 });
 
+export const clearSearchMovies = ()=>({
+  type: CLEAR_SEARCH_MOVIES
+});
 
 export const fetccUserFailure = error => ({
   type: FETCH_USER_FAILURE,

@@ -2,11 +2,11 @@ import React from "react";
 import { connect } from "react-redux";
 import { 
     showUsermovies, deletmovie, closemodal, openmodal} 
-    from "./logInmovieListActions";
+    from "../../redux/actions/actions";
 import Modal from "react-modal";
 import LogOut from "./logout";
 import ToSearchList from "./tosearch";
-import { cookies, get_movie_list, fetccUserFailure } from "./logInmovieListActions";
+import { cookies, get_movie_list, fetccUserFailure } from "../../redux/actions/actions";
 
 class UserMovieList extends React.Component {
     constructor(props) {
