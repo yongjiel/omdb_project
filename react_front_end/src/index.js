@@ -13,8 +13,21 @@ import { createStore, applyMiddleware } from 'redux';
 import { Provider } from 'react-redux';
 import Modal from "react-modal";
 import { useNavigate } from 'react-router-dom';
+// composeWithDevTools is tools that gonna be connecting our application for debugging the redux into the browser
+import { composeWithDevTools } from 'redux-devtools-extension';
+// This is the middleware that we gonna use redux-saga
+import createSagaMiddleware from 'redux-saga';
+import rootSaga from './redux/sagas';
 
-const store = createStore(rootReducers, applyMiddleware(thunk));
+//const store = createStore(rootReducers, applyMiddleware(thunk));
+const sagaMiddleware = createSagaMiddleware();
+
+const store = createStore(
+  rootReducers,
+  {},
+  composeWithDevTools(applyMiddleware(thunk),
+                      applyMiddleware(sagaMiddleware))
+)
 
 function AppRoutes() {
   const navigate = useNavigate();
@@ -40,6 +53,9 @@ const App = () =>{
     </Provider>
     );
 };
+
+// Run redux-saga
+sagaMiddleware.run(rootSaga)
 
 const container = document.getElementById('root');
 Modal.setAppElement(container);

@@ -2,10 +2,14 @@ import React from "react";
 import { connect } from "react-redux";
 import SearchBox from "../searchBox";
 import { 
-    fetchMovieList, addmovie, backtoSearchPart} from "./logInmovieListActions";
-    import LogOut from "./logout";
+    fetchMovieList,
+    addmovie,
+    backtoSearchPart,
+    clearSearchMovies
+} from "../../redux/actions/actions";
+import LogOut from "./logout";
 import ToUserMovieList from "./touserlist";
-import { cookies, get_movie_list, fetccUserFailure } from "./logInmovieListActions";
+import { cookies, get_movie_list, fetccUserFailure } from "../../redux/actions/actions";
 
 class MovieList extends React.Component {
     constructor(props) {
@@ -34,6 +38,7 @@ class MovieList extends React.Component {
     handleSearchSubmit(e){
       e.preventDefault();
       const form = e.target;
+      this.props.dispatch(clearSearchMovies());
       this.get_list(form.search.value, 1);
     }
 
@@ -101,10 +106,16 @@ class MovieList extends React.Component {
           <h1>Search Movie List. </h1>
           <SearchBox handleSearchSubmit={this.handleSearchSubmit}/>
           {!!this.props.page && !!this.props.totalPages &&
-            (<div>Totally {this.props.totalResults} records. Show from {this.props.page * 10 - 9} - 
+            (<div>Totally {this.props.totalResults} records. Show from 1 - 
                 {(this.props.totalResults < this.props.page * 10)? this.props.totalResults : this.props.page * 10} </div>)}
           <br/>
           { this.get_content() }
+          
+
+        </div>
+      );
+    }
+/*
           {this.props.totalPages >1 &&
             (<div><span><button onClick={()=>this.get_list(this.props.search_text, 1)}> 1 </button></span>
                   <span><button onClick={()=>this.get_list(this.props.search_text, this.props.page-1)}
@@ -112,12 +123,7 @@ class MovieList extends React.Component {
                   <span><button onClick={()=>this.get_list(this.props.search_text, this.props.page+1)}
                           disabled={(this.props.page === this.props.totalPages)? true: false}> &gt; </button></span>
                   <span><button onClick={()=>this.get_list(this.props.search_text, this.props.totalPages)}> {this.props.totalPages} </button></span>
-                  </div>)}
-
-        </div>
-      );
-    }
-
+                  </div>)}*/
     refetch_user_movie_list(token){
       if (token === null){
         this.props.dispatch(fetccUserFailure("Could not get user's movies"));

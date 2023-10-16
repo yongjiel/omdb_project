@@ -1,6 +1,6 @@
 import React from "react";
 import { connect } from "react-redux";
-import {  showUsermovies} from "./logInmovieListActions";
+import {  showUsermovies} from "../../redux/actions/actions";
 
 
 class ToUserMovieList extends React.Component {

@@ -1,6 +1,6 @@
 import React from "react";
 import { connect } from "react-redux";
-import { fetchUser} from "./logInmovieListActions";
+import { fetchUser} from "../../redux/actions/actions";
 import { Formik, Field, Form } from "formik";
 
 

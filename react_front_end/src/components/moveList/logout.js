@@ -1,6 +1,6 @@
 import React from "react";
 import { connect } from "react-redux";
-import { logout, cookies} from "./logInmovieListActions";
+import { logout, cookies} from "../../redux/actions/actions";
 
 
 class LogOut extends React.Component {

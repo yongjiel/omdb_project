@@ -1,6 +1,7 @@
 
 import {
     FETCH_MOVIE_LIST_BEGIN,
+    FETCH_MOVIE_IN_PROGRESS,
     FETCH_MOVIE_LIST_SUCCESS,
     FETCH_MOVIE_LIST_FAILURE,
     FETCH_MOVIE_LIST_SUCCESS_EMPTY_RESULT,
@@ -8,6 +9,7 @@ import {
     FETCH_USER_SUCCESS,
     FETCH_USER_FAILURE,
     FETCH_USER_MOVIE_SUCCESS,
+    CLEAR_SEARCH_MOVIES,
     LOG_OUT,
     ADD_MOVIE,
     SHOW_USER_MOVIES,
@@ -20,7 +22,7 @@ import {
     ADD_MOVIE_ENTIRE_RECORD,
     CLOSE_MODAL,
     OPEN_MODAL
-  } from './logInmovieListActions';
+  } from '../actions/actions';
   
   const initialState = {
         search_text: null,
@@ -46,13 +48,21 @@ import {
       case FETCH_MOVIE_LIST_BEGIN:
         return state;
 
+      case FETCH_MOVIE_IN_PROGRESS:
+        return {...state,
+              ...action.payload};
+
       case FETCH_MOVIE_LIST_SUCCESS:
-        return {
-          ...state,
-          ...action.payload,
-          username: state.username,
-          show_user_movies_flag: false
-        };
+          return {
+            ...state,
+            ...action.payload,
+            search_movies: [...state.search_movies, ...action.payload.search_movies],
+            username: state.username,
+            show_user_movies_flag: false
+          };
+      
+      case CLEAR_SEARCH_MOVIES:
+        return {...state, search_movies: []};
       
       case FETCH_MOVIE_LIST_SUCCESS_EMPTY_RESULT:
         return {

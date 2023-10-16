@@ -1,7 +1,7 @@
 import React from "react";
 import { connect } from "react-redux";
 import MovieList from "./movielist";
-import { cookies} from "./logInmovieListActions";
+import { cookies} from "../../redux/actions/actions";
 
 
 class LogInMovieList extends React.Component {

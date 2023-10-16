@@ -2,7 +2,7 @@ import React from "react";
 import { connect } from "react-redux";
 import { 
     showUsermovies, backtoSearchPart,
-    deletmovie, closemodal, openmodal} from "./logInmovieListActions";
+    deletmovie, closemodal, openmodal} from "../../redux/actions/actions";
 import Modal from "react-modal";
 import LogOut from "./logout";
 
