@@ -13,7 +13,8 @@ all the save button clicks until user's list is less than 5.
 ==== For front end boot up ====
 1. cd  react_front_end
 2.  npm install
-3.  npm start
+3. update .env file, change to http://127.0.0.1:8000, in cybera, http://199.116.235.211:8000
+4.  npm start 
 
 ==== For backend boot up ====
 1. cd django_backend

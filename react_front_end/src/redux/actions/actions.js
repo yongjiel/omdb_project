@@ -196,7 +196,7 @@ export function addmovie(post, navigate){
     axios.get(url)
           .then(res => {
               dispatch(add_movie_entire_record(res.data));
-              const url = `http://127.0.0.1:8000/api/movies`;
+              const url = `${process.env.REACT_APP_PROXY_HOST}/api/movies`;
               fetch(url
                       ,{
                         headers: {
@@ -233,7 +233,7 @@ export function addmovie(post, navigate){
 export function deletmovie(i, imdbID, navigate){
   return dispatch => {
     dispatch(deleteMovie(i));
-    const url = `http://127.0.0.1:8000/api/movies/`+imdbID;
+    const url = `${process.env.REACT_APP_PROXY_HOST}/api/movies/`+imdbID;
               fetch(url
                 ,{
                   headers: {
@@ -273,7 +273,7 @@ export function showUsermovies(){
 
 
 function getToken(value) {
-  const url = `http://localhost:8000/api/token/?format=json`;
+  const url = `${process.env.REACT_APP_PROXY_HOST}/api/token/?format=json`;
   return axios.post(url, {
     username: value.username,
     password: value.password
@@ -289,7 +289,7 @@ function getToken(value) {
 }
 
  function getUserMovieList(token){
-  const url = "http://127.0.0.1:8000/api/userlist/?format=json";
+  const url = `${process.env.REACT_APP_PROXY_HOST}/api/userlist/?format=json`;
   const config = {
     headers: { 
       //Authorization: `Token ${token}` // for normal token
