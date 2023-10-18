@@ -13,7 +13,7 @@ class SearchBox extends React.Component {
             <form onSubmit={this.handleSubmit}>
             <input name="search" defaultValue={"social"}>
             </input> 
-            <button type="submit">Search</button>
+            <button className="text-base our-blue our-background leading-normal" type="submit">Search</button>
             </form>
             </div>
             </>

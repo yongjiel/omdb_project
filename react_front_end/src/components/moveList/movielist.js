@@ -82,7 +82,10 @@ class MovieList extends React.Component {
                       {post.Title}
                     </td>
                     <td style={{width: '150px'}}>{post.Year}</td>
-                    <td><button onClick={()=>this.save(post)}
+                    <td><button className={ (this.check_in_user_movies(post.imdbID) || this.props.user_movies.length >=5)?
+                                             "text-base our-grey our-light-grey-background leading-normal": 
+                                             "text-base our-blue our-light-grey-background leading-normal"} 
+                                onClick={()=>this.save(post)}
                               disabled={ 
                                 (this.check_in_user_movies(post.imdbID) || this.props.user_movies.length >=5)? true: false}>
                         Save</button></td>
@@ -101,9 +104,10 @@ class MovieList extends React.Component {
     get_search_part(){
       return (
         <div>
-          {this.show_logout_button()}&nbsp;
+          {this.show_logout_button()}&nbsp;&nbsp;&nbsp;
           <ToUserMovieList navigate={this.props.navigate}/>
           {this.checkUserList()}
+          <br/><br/>
           <h1>Search Movie List. </h1>
           <SearchBox handleSearchSubmit={this.handleSearchSubmit}/>
           {!!this.props.page && !!this.props.totalPages &&

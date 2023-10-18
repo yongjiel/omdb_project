@@ -19,6 +19,8 @@ import { composeWithDevTools } from 'redux-devtools-extension';
 import createSagaMiddleware from 'redux-saga';
 import rootSaga from './redux/sagas';
 
+import './tailwind.output.css';
+
 //const store = createStore(rootReducers, applyMiddleware(thunk));
 const sagaMiddleware = createSagaMiddleware();
 
@@ -32,7 +34,7 @@ const store = createStore(
 function AppRoutes() {
   const navigate = useNavigate();
   return (
-      <div>
+      <div className=" our-width max-w-3xl mx-auto flex p-6 bg-gray-100 mt-10 rounded-lg shadow-xl">
       <Routes>        
         <Route index path='/' element={ <Navigate to='/login' /> } />
         <Route index path='/login' element={ <LogIn navigate={navigate}/>} />
@@ -48,12 +50,13 @@ const App = () =>{
   return(
     <Provider store={store}>
       <BrowserRouter basename='/'>
-        <AppRoutes/>
+        <AppRoutes/>  
       </BrowserRouter>
     </Provider>
     );
+  
 };
-
+// 
 // Run redux-saga
 sagaMiddleware.run(rootSaga)
 

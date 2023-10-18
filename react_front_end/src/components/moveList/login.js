@@ -39,7 +39,7 @@ class LogIn extends React.Component {
                               <td><Field name="password" label='password' type="password" /></td></tr>
                               </tbody>
                           </table>
-                      <button type="submit">Submit</button>
+                      <button className="text-base our-red our-background leading-normal" type="submit">Submit</button>
                       </Form>
                   </Formik>
                   );
@@ -49,7 +49,7 @@ class LogIn extends React.Component {
 
     checkError(){
         if (!!this.props.error){
-            const text = (<p style={{backgroundColor: "#F9D1C9"}}>{this.props.error}</p>);
+            const text = (<p className="text-base our-red our-background leading-normal" >{this.props.error}</p>);
             return text;
         }
         return '';
@@ -57,10 +57,13 @@ class LogIn extends React.Component {
 
     get_login_part(){
       return (
-        <div>
-          <h1>Log in</h1>
-          { this.checkError() }
-          { this.get_login_content() }
+        <div className="ml-6 pt-1">
+          <h1 className="text-2xl text-blue-700 leading-tight">
+            Log in
+          </h1>
+
+            { this.checkError() }
+            { this.get_login_content() }
         </div>
       );
     }

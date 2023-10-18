@@ -53,8 +53,9 @@ class UserMovieList extends React.Component {
     get_user_movies_part(){
       let text = "";
         text = (<div>
-                {this.show_logout_button()}&nbsp;
+                {this.show_logout_button()}&nbsp;&nbsp;&nbsp;
                 <ToSearchList navigate={this.props.navigate}/>
+                <br/><br/>
                 <h1>Hi, User, your Movie List. </h1>
                 <table key='table'>
                 <tbody key='tbody'>
@@ -66,7 +67,7 @@ class UserMovieList extends React.Component {
                         <u>{post.Title}</u></a>
                     </td>
                     <td style={{width: '150px'}}>{post.Year}</td>
-                    <td><button onClick={ () => {this.delete(post)} } >
+                    <td><button className="text-base our-red our-light-grey-background leading-normal" onClick={ () => {this.delete(post)} } >
                         Delete</button></td>
                     </tr>
                   ))}
