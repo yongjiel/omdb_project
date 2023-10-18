@@ -25,10 +25,10 @@ SECRET_KEY = 'django-insecure-26@&&@m&8uy0s#3z5+!(g2zxm=-$o$rr_2-h8-obag-&$snap!
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-
-ALLOWED_HOSTS = [
-    #'199.116.235.211'
-    ]
+REMOTE_HOST_CONFIG = '' #'199.116.235.211'
+ALLOWED_HOSTS = []
+if REMOTE_HOST_CONFIG:
+    ALLOWED_HOSTS = [REMOTE_HOST_CONFIG] + ALLOWED_HOSTS
 
 
 # Application definition
@@ -157,10 +157,13 @@ REST_FRAMEWORK = {
 }
 
 CORS_ALLOWED_ORIGINS = [
-    #"http://199.116.235.211:3000",
     "http://localhost:3000",
     "http://127.0.0.1:3000"
 ]
+
+if REMOTE_HOST_CONFIG:
+    CORS_ALLOWED_ORIGINS = [f"http://{REMOTE_HOST_CONFIG}:3000"] + \
+                            CORS_ALLOWED_ORIGINS
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=15),

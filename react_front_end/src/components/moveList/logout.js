@@ -1,7 +1,7 @@
 import React from "react";
 import { connect } from "react-redux";
-import { logout, cookies} from "../../redux/actions/actions";
-
+import { logout} from "../../redux/actions/actions";
+import { cookies } from "../../redux/api/todo-api";
 
 class LogOut extends React.Component {
     constructor(props) {

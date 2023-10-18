@@ -6,7 +6,8 @@ import {
 import Modal from "react-modal";
 import LogOut from "./logout";
 import ToSearchList from "./tosearch";
-import { cookies, get_movie_list, fetccUserFailure } from "../../redux/actions/actions";
+import { fetchMovieListInDjango, fetccUserFailure } from "../../redux/actions/actions";
+import { cookies } from "../../redux/api/todo-api";
 
 class UserMovieList extends React.Component {
     constructor(props) {
@@ -152,7 +153,7 @@ class UserMovieList extends React.Component {
         if (token === null){
             this.props.dispatch(fetccUserFailure("Could not get user's movies"));
           }
-        this.props.dispatch(get_movie_list(token, this.props.user_movies, null,null));
+        this.props.dispatch(fetchMovieListInDjango(token, this.props.user_movies, null,null));
       }
 
     render() {

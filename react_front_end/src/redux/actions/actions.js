@@ -1,13 +1,12 @@
 import {
-  fetchMoviesByPageNumber
-
+  fetchOMDBMoviesByPageNumber,
+  postDjangoMovie,
+  fetchOMDBMovieByID,
+  deleteMovieInDjango,
+  fetchTokenInDjango,
+  fetchUserMovieListInDjango,
+  cookies
 } from "../api/todo-api";
-
-import axios from "axios";
-import Cookies from 'universal-cookie';
-export const cookies = new Cookies();
-
-
 
 export const FETCH_MOVIE_LIST_BEGIN   = 'FETCH_MOVIE_LIST_BEGIN';
 export const FETCH_MOVIE_IN_PROGRESS = 'FETCH_MOVIE_IN_PROGRESS';
@@ -57,12 +56,14 @@ function fetchMoviesByPage(moviePartialText, page) {
   return async(dispatch) => {
     
     try{
-      const st = await fetchMoviesByPageNumber(moviePartialText, page)
+      const st = await fetchOMDBMoviesByPageNumber(moviePartialText, page)
       dispatch(fetchMovieListSuccess(st));
       if (st.page !== st.totalPages){
         dispatch(fetchMovieListInProgress({page: st.page}));
       }
     }catch(error){
+        console.log("......////");
+        console.log(error.message);
         dispatch(fetchMovieListFailure({error: error.message}));
     };
 
@@ -192,77 +193,49 @@ export function add_movie_entire_record(data){
 export function addmovie(post, navigate){
   return dispatch => {
     dispatch(addMovieToUserMovies(post));
-    const url = `https://www.omdbapi.com/?apikey=6ca48b3b&i=` + post.imdbID;
-    axios.get(url)
-          .then(res => {
-              dispatch(add_movie_entire_record(res.data));
-              const url = `${process.env.REACT_APP_PROXY_HOST}/api/movies`;
-              fetch(url
-                      ,{
-                        headers: {
-                          'Content-type': 'application/json',
-                          'Accept': 'application/json',
-                          'Authorization': 'Bearer ' + cookies.get("token"),
-                        },
-                        method: "POST",
-                        body: JSON.stringify(res.data)
-                      })
-              .then(res => {
-                if ( [200, 201].includes(res.status) ) {
-                    dispatch(addMovieSuccess());
-                } else {
-                    if ( [401].includes(res.status) ) {
-                      alert("Token timeout! Back to login")
-                      dispatch(logOut());
-                      navigate("/login");
-                    }else{
-                      dispatch(addMovieFailure());
-                    }
-                   
-                }
-              })
-              .catch(
-                error => {
-                  console.log(error);
-                }
-              );
-    });
-  }
+    // be careful, those axios returns  only promise.
+    const resp_promise = fetchOMDBMovieByID(post.imdbID);
+    resp_promise.then(resp=>{
+      dispatch(add_movie_entire_record(resp.data));
+      const res_prmomise = postDjangoMovie(resp.data);
+      res_prmomise.then(res=>{
+        if ( [200, 201].includes(res.status) ) {
+          dispatch(addMovieSuccess());
+        } else {
+            if ( [401].includes(res.status) ) {
+              alert("Token timeout! Back to login")
+              dispatch(logOut());
+              navigate("/login");
+            }else{
+              dispatch(addMovieFailure());
+            }
+            
+        }
+      });
+    })
+  };
 }
 
 export function deletmovie(i, imdbID, navigate){
   return dispatch => {
     dispatch(deleteMovie(i));
-    const url = `${process.env.REACT_APP_PROXY_HOST}/api/movies/`+imdbID;
-              fetch(url
-                ,{
-                  headers: {
-                    'Content-type': 'application/json',
-                    'Accept': 'application/json',
-                    'Authorization': 'Bearer ' + cookies.get("token"),
-                  },
-                  method: "DELETE"
-                })
-              .then(res => {
-                if ( [204].includes(res.status) ) {
-                    dispatch(deleteMovieSuccess());
-                } else {
-                    if ( [401].includes(res.status) ){
-                      alert("Token timeout! Back to login");
-                      dispatch(logOut());
-                      navigate('/login');
-                    }else{
-                      dispatch(deleteMovieFailure());
-                    }
-                    
-                }
-              })
-              .catch(
-                error => {
-                  console.log(error);
-                }
-              );
-  }
+    const resp = deleteMovieInDjango(imdbID);
+    resp.then(res=>{
+      if ( [204].includes(res.status) ) {
+        dispatch(deleteMovieSuccess());
+      } else {
+          if ( [401].includes(res.status) ){
+            alert("Token timeout! Back to login");
+            dispatch(logOut());
+            navigate('/login');
+          }else{
+            dispatch(deleteMovieFailure());
+          }
+          
+      }
+    });
+    
+  };
 }
 
 export function showUsermovies(){
@@ -271,53 +244,17 @@ export function showUsermovies(){
   }
 }
 
-
-function getToken(value) {
-  const url = `${process.env.REACT_APP_PROXY_HOST}/api/token/?format=json`;
-  return axios.post(url, {
-    username: value.username,
-    password: value.password
-  }).then(res=>{
-    console.log(res);
-    return res.data;
-  }).catch(
-    error => {
-      console.log(error);
-      return "Could not get token";
-    }
-  );
-}
-
- function getUserMovieList(token){
-  const url = `${process.env.REACT_APP_PROXY_HOST}/api/userlist/?format=json`;
-  const config = {
-    headers: { 
-      //Authorization: `Token ${token}` // for normal token
-      Authorization: `Bearer ${token}`
-    }  
-  };
-  return axios.get(url, config)
-          .then(res=>{
-            return res.data;
-          })
-          .catch(
-            error => {
-              console.log(error);
-            }
-          );
-}
-
 function is_not_in_user_movies(mvs, id){
   return mvs.filter(m => m.imdbID === id).length === 0;
 }
 
-export function get_movie_list(token, mvs, navigate, uri) {
+export function fetchMovieListInDjango(token, mvs, navigate, uri) {
   return dispatch => {
     if (token === null){
       dispatch(fetccUserFailure("Could not get user's movies"));
       return;
     }
-    getUserMovieList(token)
+    fetchUserMovieListInDjango(token)
     .then(movies=> {
       movies.map(m => {
         if ( is_not_in_user_movies(mvs, m.imdbID) ){
@@ -343,10 +280,10 @@ export function fetchUser(value, mvs, navigate, uri) {
   return dispatch => {
     dispatch(fetccUserBegin(value));
     
-    getToken(value)
+    fetchTokenInDjango(value)
         .then(data => {
-          dispatch(get_movie_list(data.access, mvs, navigate, uri)); // for jwt token
-          //    dispatch(get_movie_list(data.key, mvs, navigate, uri)); // for normal token
+          dispatch(fetchMovieListInDjango(data.access, mvs, navigate, uri)); // for jwt token
+          //    dispatch(fetchMovieListInDjango(data.key, mvs, navigate, uri)); // for normal token
               //dispatch(fetchUserMovieSuccess(mvss)); //search_movies for loading 10 records from source site.
               return data.key;
           })

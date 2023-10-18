@@ -20,7 +20,8 @@ all the save button clicks until user's list is less than 5.
 1. cd django_backend
 2. source venv/bin/activate
 2. pip install -r requirements.txt
-3. python manage.py runserver
+3. in current/setting.py, REMOTE_HOST_CONFIG, switch on 199.116.235.211 if it is cybera.
+4. python manage.py runserver
 
 
 === For test ===

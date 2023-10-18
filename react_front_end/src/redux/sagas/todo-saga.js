@@ -36,7 +36,7 @@ import {
   
   // Import all api's
   import {
-    fetchMoviesByPageNumber,
+    fetchOMDBMoviesByPageNumber,
     fetchNewUser,
     deleteExistingMovie
   } from '../api/todo-api';
@@ -46,7 +46,7 @@ import {
   // Get Todos
   function* fetchAllMovies() {
     // 1 is in actions to trigger by the button.
-    //yield call(fetchMoviesByPageNumber, 'social', 1);
+    //yield call(fetchOMDBMoviesByPageNumber, 'social', 1);
     /// Could pick up new values right here after first time from actions 1
     const moviePartialText = yield select(state=> state.logInmovieListReducer.search_text);
     const totalPages = yield select(state => state.logInmovieListReducer.totalPages);
@@ -60,17 +60,17 @@ import {
       yield put({ type: FETCH_MOVIE_LIST_SUCCESS, payload: st })
     }else if (currentPage < totalPages) {
       console.log("/////fdsafdsfdsfsd " + totalPages.toString() + " "+ (currentPage+1).toString());
-      const st = yield call(fetchMoviesByPageNumber, moviePartialText, currentPage+1);
-      // saga must constrol the dispatch, not it fetchMoviesByPageNumber.
+      const st = yield call(fetchOMDBMoviesByPageNumber, moviePartialText, currentPage+1);
+      // saga must constrol the dispatch, not it fetchOMDBMoviesByPageNumber.
       if (st.hasOwnProperty("Error")){
         //dispatch(fetchMovieListSuccessEmptyResult(res.data.Error));
        yield put( {type: FETCH_MOVIE_LIST_SUCCESS_EMPTY_RESULT,
         payload: { error: st.Error } 
-                })
+                });
       } else{
         yield put({ type: FETCH_MOVIE_LIST_SUCCESS, payload: st});
         if (currentPage+1 !== totalPages){
-          yield put({ type: FETCH_MOVIE_IN_PROGRESS, payload: {page: currentPage+1}})
+          yield put({ type: FETCH_MOVIE_IN_PROGRESS, payload: {page: currentPage+1}});
         }
       }
       
