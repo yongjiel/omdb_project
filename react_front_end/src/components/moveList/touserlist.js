@@ -6,18 +6,18 @@ import {  showUsermovies} from "../../redux/actions/actions";
 class ToUserMovieList extends React.Component {
     constructor(props) {
       super(props);
-      this.show_user_movies = this.show_user_movies.bind(this);
+      this.showUserMovies = this.showUserMovies.bind(this);
     }
 
     
-    show_user_movies(){
+    showUserMovies(){
         this.props.dispatch(showUsermovies());
         this.props.navigate("/userlist");
      }
     
     render() {
           return <button
-          onClick={this.show_user_movies} style={{border: "0px", backgroundColor: "#DAFCF7"}}>User&lsquo;s movies</button>;
+          onClick={this.showUserMovies} style={{border: "0px", backgroundColor: "#DAFCF7"}}>User&lsquo;s movies</button>;
     }
 
 }

@@ -42,8 +42,8 @@ import {
         loading: true
   };
   
-  export default function logInmovieListReducer(state = initialState, action) {
-    console.log('logInmovieListReducer', state, action);
+  export default function movieListReducer(state = initialState, action) {
+    console.log('movieListReducer', state, action);
     switch(action.type) {
       case FETCH_MOVIE_LIST_BEGIN:
         return state;

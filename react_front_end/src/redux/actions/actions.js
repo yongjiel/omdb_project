@@ -209,7 +209,6 @@ export function addmovie(post, navigate){
             }else{
               dispatch(addMovieFailure());
             }
-            
         }
       });
     })

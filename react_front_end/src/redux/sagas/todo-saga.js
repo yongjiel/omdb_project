@@ -48,17 +48,17 @@ import {
     // 1 is in actions to trigger by the button.
     //yield call(fetchOMDBMoviesByPageNumber, 'social', 1);
     /// Could pick up new values right here after first time from actions 1
-    const moviePartialText = yield select(state=> state.logInmovieListReducer.search_text);
-    const totalPages = yield select(state => state.logInmovieListReducer.totalPages);
-    const currentPage = yield select(state=> state.logInmovieListReducer.page);
+    const moviePartialText = yield select(state=> state.movieListReducer.search_text);
+    const totalPages = yield select(state => state.movieListReducer.totalPages);
+    const currentPage = yield select(state=> state.movieListReducer.page);
    // next page
    console.log(moviePartialText);
    console.log(totalPages);
    console.log(currentPage);
-    if (currentPage === totalPages && totalPages !==0 && currentPage !== 0){
+  if (currentPage === totalPages && totalPages !==0 && currentPage !== 0){
       let st = yield select(state=> state)
       yield put({ type: FETCH_MOVIE_LIST_SUCCESS, payload: st })
-    }else if (currentPage < totalPages) {
+  }else if (currentPage < totalPages) {
       console.log("/////fdsafdsfdsfsd " + totalPages.toString() + " "+ (currentPage+1).toString());
       const st = yield call(fetchOMDBMoviesByPageNumber, moviePartialText, currentPage+1);
       // saga must constrol the dispatch, not it fetchOMDBMoviesByPageNumber.
@@ -74,7 +74,7 @@ import {
         }
       }
       
-   }else{
+  }else{
       yield put({ type: FETCH_MOVIE_LIST_BEGIN})
    }
   }

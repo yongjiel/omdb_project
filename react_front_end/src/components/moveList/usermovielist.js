@@ -12,11 +12,11 @@ import { cookies } from "../../redux/api/todo-api";
 class UserMovieList extends React.Component {
     constructor(props) {
       super(props);
-      this.show_user_movies = this.show_user_movies.bind(this);
+      this.showUserMovies = this.showUserMovies.bind(this);
       this.delete = this.delete.bind(this);
-      this.close_modal = this.close_modal.bind(this);
-      this.open_modal = this.open_modal.bind(this);
-      this.show_modal = this.show_modal.bind(this);
+      this.closeModal = this.closeModal.bind(this);
+      this.openModal = this.openModal.bind(this);
+      this.showModal = this.showModal.bind(this);
       this.first_time= true;
     }
 
@@ -27,11 +27,11 @@ class UserMovieList extends React.Component {
       }
     }
 
-    show_user_movies(){
+    showUserMovies(){
       this.props.dispatch(showUsermovies());
     }
 
-    check_in_user_movies(imdbID){
+    checkInUserMovies(imdbID){
       if (this.props.user_movies.length === 0){
         return false;
       }
@@ -42,18 +42,18 @@ class UserMovieList extends React.Component {
       return false;
     }
    
-    show_logout_button(){
+    showLogoutButton(){
         return <LogOut navigate={this.props.navigate}/>;            
     }
 
-    open_modal(imdbID){
+    openModal(imdbID){
       this.props.dispatch(openmodal(imdbID));
     }
 
-    get_user_movies_part(){
+    getUserMoviesPart(){
       let text = "";
         text = (<div>
-                {this.show_logout_button()}&nbsp;&nbsp;&nbsp;
+                {this.showLogoutButton()}&nbsp;&nbsp;&nbsp;
                 <ToSearchList navigate={this.props.navigate}/>
                 <br/><br/>
                 <h1>Hi, User, your Movie List. </h1>
@@ -63,27 +63,29 @@ class UserMovieList extends React.Component {
                   {this.props.user_movies.map((post, i) => (
                     <tr key={'row'+i}>
                     <td key={post.imdbID} style={{width: '600px'}}>
-                      <a onClick={()=>{this.open_modal(post.imdbID)}} style={{color: "#2F020C"}}>
+                      <a onClick={()=>{this.openModal(post.imdbID)}} style={{color: "#2F020C"}}>
                         <u>{post.Title}</u></a>
                     </td>
                     <td style={{width: '150px'}}>{post.Year}</td>
-                    <td><button className="text-base our-red our-light-grey-background leading-normal" onClick={ () => {this.delete(post)} } >
+                    <td><button 
+                      className="text-base our-red our-light-grey-background leading-normal"
+                      onClick={ () => {this.delete(post)} } >
                         Delete</button></td>
                     </tr>
                   ))}
                 </tbody>
                 </table>
-                {this.props.isOpenModal && this.show_modal()}
+                {this.props.isOpenModal && this.showModal()}
                 </div>);
 
       return text;
     }
 
-    close_modal(){
+    closeModal(){
       this.props.dispatch(closemodal());
     }
 
-    show_modal(){
+    showModal(){
       let movies = [];
       let imdbID = this.props.modalImdbID;
       if (!!this.props.user_movies_entire_records){
@@ -133,11 +135,11 @@ class UserMovieList extends React.Component {
         <div>
           <Modal
           isOpen={this.props.isOpenModal}
-          onRequestClose={this.close_modal}
+          onRequestClose={this.closeModal}
           style={modalStyle}
         >
          <button type="button" className="close"
-                 onClick={()=>this.close_modal()}>&times;</button>
+                 onClick={()=>this.closeModal()}>&times;</button>
           <table  key={'modal_table'}>
             <tbody key={'modal_tbody'}>
           {table_content}
@@ -150,7 +152,7 @@ class UserMovieList extends React.Component {
       );
     }
     
-    refetch_user_movie_list(token){
+    refetchUserMovieList(token){
         if (token === null){
             this.props.dispatch(fetccUserFailure("Could not get user's movies"));
           }
@@ -170,11 +172,11 @@ class UserMovieList extends React.Component {
                 // if refectch again, the last one in user_movies will trigger the django
                 // /userlist again to get the non-deleted record back. the refetch and 
                 // /movies/<id> (HTTP DELETE ) competing.
-                //this.refetch_user_movie_list(token);
+                //this.refetchUserMovieList(token);
               }
             } else{
               if (this.props.loading){
-                this.refetch_user_movie_list(token);
+                this.refetchUserMovieList(token);
                 return <><p>Loading......</p></>;
               }
               else if (!this.props.loggedIn){
@@ -188,7 +190,7 @@ class UserMovieList extends React.Component {
             
             this.first_time = false;
           }
-        return this.get_user_movies_part();
+        return this.getUserMoviesPart();
         
     }
 
@@ -197,13 +199,13 @@ class UserMovieList extends React.Component {
 
 const mapStateToProps = state => {
   return {
-    error: state.logInmovieListReducer.error,
-    user_movies: state.logInmovieListReducer.user_movies,
-    isOpenModal: state.logInmovieListReducer.isOpenModal,
-    user_movies_entire_records: state.logInmovieListReducer.user_movies_entire_records,
-    modalImdbID: state.logInmovieListReducer.modalImdbID,
-    loading: state.logInmovieListReducer.loading,
-    loggedIn: state.logInmovieListReducer.loggedIn
+    error: state.movieListReducer.error,
+    user_movies: state.movieListReducer.user_movies,
+    isOpenModal: state.movieListReducer.isOpenModal,
+    user_movies_entire_records: state.movieListReducer.user_movies_entire_records,
+    modalImdbID: state.movieListReducer.modalImdbID,
+    loading: state.movieListReducer.loading,
+    loggedIn: state.movieListReducer.loggedIn
   };
 };
 

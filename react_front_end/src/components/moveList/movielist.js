@@ -17,9 +17,12 @@ class MovieList extends React.Component {
       super(props);
       this.handleSearchSubmit = this.handleSearchSubmit.bind(this);
       this.save = this.save.bind(this);
-      this.get_search_part = this.get_search_part.bind(this);
+      this.getSearchPart = this.getSearchPart.bind(this);
       this.checkUserList = this.checkUserList.bind(this);
+      this.refetchUserMovieList= this.refetchUserMovieList.bind(this);
       this.first_time= true;
+      this.getList = this.getList.bind(this);
+      this.showSearchPart = this.showSearchPart.bind(this);
     }
 
     checkUserList(){
@@ -31,8 +34,7 @@ class MovieList extends React.Component {
       return '';
     }
 
-
-    get_list(text, page){
+    getList(text, page){
       this.props.dispatch(fetchMovieList(text, page));
     }
 
@@ -40,7 +42,7 @@ class MovieList extends React.Component {
       e.preventDefault();
       const form = e.target;
       this.props.dispatch(clearSearchMovies());
-      this.get_list(form.search.value, 1);
+      this.getList(form.search.value, 1);
     }
 
     save(post){
@@ -50,16 +52,15 @@ class MovieList extends React.Component {
       
     }
 
-
-    show_logout_button(){
+    showLogoutButton(){
         return <LogOut navigate={this.props.navigate}/>;            
     }
 
-    show_search_part(){
+    showSearchPart(){
         this.props.dispatch(backtoSearchPart());
     }
 
-    check_in_user_movies(imdbID){
+    checkInUserMovies(imdbID){
       if (this.props.user_movies.length === 0){
         return false;
       }
@@ -70,7 +71,7 @@ class MovieList extends React.Component {
       return false;
     }
 
-    get_content(){
+    getTableContent(){
       let text = "";
       if (!this.props.error && this.props.search_movies.length > 0){
         text = (<table key='table'>
@@ -82,12 +83,13 @@ class MovieList extends React.Component {
                       {post.Title}
                     </td>
                     <td style={{width: '150px'}}>{post.Year}</td>
-                    <td><button className={ (this.check_in_user_movies(post.imdbID) || this.props.user_movies.length >=5)?
-                                             "text-base our-grey our-light-grey-background leading-normal": 
-                                             "text-base our-blue our-light-grey-background leading-normal"} 
+                    <td><button className={ "text-base our-light-grey-background leading-normal " +  
+                                              ((this.checkInUserMovies(post.imdbID) || 
+                                                this.props.user_movies.length >=5)?
+                                             "our-grey":"our-blue")} 
                                 onClick={()=>this.save(post)}
                               disabled={ 
-                                (this.check_in_user_movies(post.imdbID) || this.props.user_movies.length >=5)? true: false}>
+                                (this.checkInUserMovies(post.imdbID) || this.props.user_movies.length >=5)? true: false}>
                         Save</button></td>
                     </tr>
                   ))}
@@ -100,11 +102,10 @@ class MovieList extends React.Component {
       return text;
     }
 
-
-    get_search_part(){
+    getSearchPart(){
       return (
         <div>
-          {this.show_logout_button()}&nbsp;&nbsp;&nbsp;
+          {this.showLogoutButton()}&nbsp;&nbsp;&nbsp;
           <ToUserMovieList navigate={this.props.navigate}/>
           {this.checkUserList()}
           <br/><br/>
@@ -114,7 +115,7 @@ class MovieList extends React.Component {
             (<div>Totally {this.props.totalResults} records. Show from 1 - 
                 {(this.props.totalResults < this.props.page * 10)? this.props.totalResults : this.props.page * 10} </div>)}
           <br/>
-          { this.get_content() }
+          { this.getTableContent() }
           
 
         </div>
@@ -122,14 +123,14 @@ class MovieList extends React.Component {
     }
 /*
           {this.props.totalPages >1 &&
-            (<div><span><button onClick={()=>this.get_list(this.props.search_text, 1)}> 1 </button></span>
-                  <span><button onClick={()=>this.get_list(this.props.search_text, this.props.page-1)}
+            (<div><span><button onClick={()=>this.getList(this.props.search_text, 1)}> 1 </button></span>
+                  <span><button onClick={()=>this.getList(this.props.search_text, this.props.page-1)}
                           disabled={(this.props.page === 1)? true: false}> &lt; </button></span>
-                  <span><button onClick={()=>this.get_list(this.props.search_text, this.props.page+1)}
+                  <span><button onClick={()=>this.getList(this.props.search_text, this.props.page+1)}
                           disabled={(this.props.page === this.props.totalPages)? true: false}> &gt; </button></span>
-                  <span><button onClick={()=>this.get_list(this.props.search_text, this.props.totalPages)}> {this.props.totalPages} </button></span>
+                  <span><button onClick={()=>this.getList(this.props.search_text, this.props.totalPages)}> {this.props.totalPages} </button></span>
                   </div>)}*/
-    refetch_user_movie_list(token){
+    refetchUserMovieList(token){
       if (token === null){
         this.props.dispatch(fetccUserFailure("Could not get user's movies"));
       }
@@ -141,10 +142,10 @@ class MovieList extends React.Component {
             let token = null;
             if (!!cookies.get('token')){
               token = cookies.get('token');
-              this.refetch_user_movie_list(token);
+              this.refetchUserMovieList(token);
             } else{
               if (this.props.loading){
-                this.refetch_user_movie_list(token);
+                this.refetchUserMovieList(token);
                 return <><p>Loading......</p></>;
               }
               else if (!this.props.loggedIn){
@@ -155,11 +156,10 @@ class MovieList extends React.Component {
             //alert("loading " + this.props.loading)
             //alert("error " + this.props.error )
             
-            
             this.first_time = false;
           }
           //alert("2222error " + this.props.error )
-          return this.get_search_part();
+          return this.getSearchPart();
     }
 
 }
@@ -167,18 +167,32 @@ class MovieList extends React.Component {
 
 const mapStateToProps = state => {
   return {
-    search_text: state.logInmovieListReducer.search_text,
-    search_movies: state.logInmovieListReducer.search_movies,
-    page: state.logInmovieListReducer.page,
-    totalPages: state.logInmovieListReducer.totalPages,
-    totalResults: state.logInmovieListReducer.totalResults,
-    error: state.logInmovieListReducer.error,
-    user_movies: state.logInmovieListReducer.user_movies,
-    userMovieListFromDB: state.logInmovieListReducer.userMovieListFromDB,
-    loading: state.logInmovieListReducer.loading
+    search_text: state.movieListReducer.search_text,
+    search_movies: state.movieListReducer.search_movies,
+    page: state.movieListReducer.page,
+    totalPages: state.movieListReducer.totalPages,
+    totalResults: state.movieListReducer.totalResults,
+    error: state.movieListReducer.error,
+    user_movies: state.movieListReducer.user_movies,
+    userMovieListFromDB: state.movieListReducer.userMovieListFromDB,
+    loading: state.movieListReducer.loading,
+    show_user_movies_flag: state.movieListReducer.show_user_movies_flag,
+    loggedIn: state.movieListReducer.loggedIn,
+    user_movies: state.movieListReducer.user_movies,
+    error: state.movieListReducer.error
   };
 };
 
+const mapDispatchToProps = dispatch => {
+  return {
+    fetchMovieListInDjango: ()=>dispatch(fetchMovieListInDjango)
+    // Cannot use this.props.dispatch(fechMovieListInDjango) anymore. Or will
+    // raise error "this.props.dispatch is not a function."
+    // this function will affect all this.props.dispatch in this file.
+  };
+};
+
+//export default connect(mapStateToProps, mapDispatchToProps)(MovieList);
 export default connect(mapStateToProps)(MovieList);
 
 

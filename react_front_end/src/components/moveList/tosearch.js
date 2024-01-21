@@ -10,16 +10,16 @@ import LogOut from "./logout";
 class ToSearchList extends React.Component {
     constructor(props) {
       super(props);
-      this.show_search_part = this.show_search_part.bind(this);
+      this.showSearchPart = this.showSearchPart.bind(this);
     }
 
-    show_search_part(){
+    showSearchPart(){
         this.props.dispatch(backtoSearchPart());
         this.props.navigate("/search");
     }
     
     render() {
-        return <button onClick={this.show_search_part}  style={{border: "0px", backgroundColor: "#DAFCF7"}}> Back to search </button>;
+        return <button onClick={this.showSearchPart}  style={{border: "0px", backgroundColor: "#DAFCF7"}}> Back to search </button>;
     }
 
 }

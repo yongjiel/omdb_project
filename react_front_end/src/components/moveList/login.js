@@ -8,20 +8,20 @@ class LogIn extends React.Component {
     constructor(props) {
       super(props);
       this.handleLogInSubmit = this.handleLogInSubmit.bind(this);
-      this.get_login_part = this.get_login_part.bind(this);
+      this.getLoginPart = this.getLoginPart.bind(this);
     }
 
-    get_user_and_movies(values){
+    getUserAndMovies(values){
       this.props.dispatch(
             fetchUser(values, this.props.user_movies, this.props.navigate, "/search")
         );
     }
 
     handleLogInSubmit(values){
-      this.get_user_and_movies(values);
+      this.getUserAndMovies(values);
     }
   
-    get_login_content(){
+    getLoginContent(){
         let text = "";
           text = (<Formik
                       initialValues={{ username: "example", password: "sample_12" }}
@@ -55,7 +55,7 @@ class LogIn extends React.Component {
         return '';
       }
 
-    get_login_part(){
+    getLoginPart(){
       return (
         <div className="ml-6 pt-1">
           <h1 className="text-2xl text-blue-700 leading-tight">
@@ -63,7 +63,7 @@ class LogIn extends React.Component {
           </h1>
 
             { this.checkError() }
-            { this.get_login_content() }
+            { this.getLoginContent() }
         </div>
       );
     }
@@ -71,15 +71,15 @@ class LogIn extends React.Component {
     
 
     render() {
-          return this.get_login_part();
+          return this.getLoginPart();
       }
 }
 
 
 const mapStateToProps = state => {
   return {
-    error: state.logInmovieListReducer.error,
-    user_movies: state.logInmovieListReducer.user_movies
+    error: state.movieListReducer.error,
+    user_movies: state.movieListReducer.user_movies
   };
 };
 
